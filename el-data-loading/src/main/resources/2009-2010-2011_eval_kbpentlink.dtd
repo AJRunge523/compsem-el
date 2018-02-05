@@ -1,0 +1,32 @@
+<!--
+    This file describes the format of the TAC/KBP Entity Linking Query XML file
+
+    History:
+        Created - 2009-06-29
+        Updated - 2010-04-27
+            Added an optional entity element
+-->
+<!ELEMENT kbpentlink   (query+)>
+<!ELEMENT query   (name, docid, entity?)>
+<!--
+     name   - The name string to link
+-->
+<!ELEMENT name   (#PCDATA)>
+<!--
+     docid  - The document in which the name string occurs 
+-->
+<!ELEMENT docid   (#PCDATA)>
+<!--
+     entity - The unique entity node ID of the linked entity
+
+              NB: This will be present ONLY in training and gold standard
+              data.  In the case that the given name string is not linked
+              to a node in the Reference KB, this field may contain the 
+              string NIL (indicating no link to the KB) or NIL followed
+              by a unique numerical sequence (e.g., NIL0001).  
+
+              Please read the documentation to determine the specific intended 
+              interpretation of this field for a given package.
+-->
+<!ELEMENT entity (#PCDATA)>
+<!ATTLIST query id ID #REQUIRED>

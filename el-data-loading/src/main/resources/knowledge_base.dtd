@@ -1,0 +1,74 @@
+<!-- 
+
+             A DTD for TAC 2009 KBP Evaluation Reference
+                      Knowledge Base XML format
+                                 V1.0
+                            June 10, 2009
+                      Linguistic Data Consortium
+
+v 0.9: Initial Version Created for the Sample Corpus (May 5, 2009)
+
+v 1.0 Changed the type of the entity_id attribute for the link
+element from IDREF to CDTA.  This is to allows the values of the
+entity_id attribute to be definied outside the file. Added the 
+class attribute on the facts element, to indicate the type of 
+infobox the facts were parsed from. (June 10, 2009)
+
+-->
+
+
+
+<!ELEMENT knowledge_base (entity*)>
+<!ELEMENT entity (facts?, wiki_text?)>
+<!ATTLIST entity id ID #REQUIRED>
+
+    <!--
+         name is a friendly name used to refer to the entity
+         it should not be assumed to be identical to the Wikipedia name
+    -->
+<!ATTLIST entity name CDATA #REQUIRED>
+
+    <!-- 
+        type is one of:
+        PER - PERson
+        ORG - ORGanization
+        GPE - GeoPolitical Entity
+        UKN - UnKnowN
+    -->
+<!ATTLIST entity type (PER|ORG|GPE|UKN) #REQUIRED>
+
+    <!--
+         This is the canonical title for the entity's 
+         Wikipedia article in the October 2008 snapshot.
+    -->
+<!ATTLIST entity wiki_title CDATA #IMPLIED>
+
+<!ELEMENT facts (fact+)>
+    <!--
+        This corresponds to the template name used in the 
+        infobox on the entity's wiki page
+    -->
+<!ATTLIST facts class CDATA #IMPLIED>
+<!ELEMENT fact (#PCDATA|link)*>
+    <!--
+         the fact name attribute is identical to the named
+         parameter found in the Wikipedia markup for the 
+         infobox on the entity's Wikipedia page
+    -->
+<!ATTLIST fact name CDATA #REQUIRED>
+    <!--
+         link elements indicate that a given text string 
+         was linked to a Wikipedia page
+    -->
+<!ELEMENT link (#PCDATA)>
+    <!--
+         if the entity_id attribute is present on a link element,
+         it indicates that the Wikipedia infobox value linked to an
+         entity that's contained in the knowledge base.
+    -->
+<!ATTLIST link entity_id CDATA #IMPLIED>
+    <!--
+         wiki_text contains a plain text rendering of the 
+         entity's Wikipedia article.
+    -->
+<!ELEMENT wiki_text (#PCDATA)>

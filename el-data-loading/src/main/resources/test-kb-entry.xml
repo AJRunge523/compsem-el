@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<knowledge_base>
+<entity wiki_title="Großrinderfeld" type="UKN" id="E0000002" name="Großrinderfeld">
+<facts class="Infobox Ort in Deutschland">
+<fact name="lat_deg">49</fact>
+<fact name="lat_min">39</fact>
+<fact name="lat_sec">53</fact>
+<fact name="lon_deg">09</fact>
+<fact name="lon_min">44</fact>
+<fact name="lon_sec">05</fact>
+<fact name="Bundesland">Baden-Württemberg</fact>
+<fact name="Regierungsbezirk">Stuttgart</fact>
+<fact name="Landkreis">Main-Tauber-Kreis</fact>
+<fact name="Höhe">311</fact>
+<fact name="Fläche">56.28</fact>
+<fact name="Einwohner">4081</fact>
+<fact name="Stand">2006-12-31</fact>
+<fact name="PLZ">97950</fact>
+<fact name="Vorwahl">09349 / 09344</fact>
+<fact name="Kfz">TBB</fact>
+<fact name="Gemeindeschlüssel">08 1 28 045</fact>
+<fact name="Straße">Am Marktplatz 6</fact>
+<fact name="Website">www.grossrinderfeld.de</fact>
+<fact name="Bürgermeister">Manfred Weis</fact>
+</facts>
+<wiki_text><![CDATA[Großrinderfeld
+
+Großrinderfeld is a village in southwestern Germany, in the state of
+Baden-Württemberg. It is located between Tauberbischofsheim and Würzburg.
+
+Großrinderfeld has a population of 4.141 (as of 2004-06-30) and consists of the
+four villages of Großrinderfeld, Gerchsheim, Schönfeld and Ilmspan.
+
+ History
+]]></wiki_text>
+</entity>
+<entity wiki_title="Mike_Quigley_(footballer)" type="PER" id="E0000001" name="Mike Quigley (footballer)">
+<facts class="Infobox Football biography">
+<fact name="playername">Mike Quigley</fact>
+<fact name="fullname">Michael Anthony Joseph Quigley</fact>
+<fact name="dateofbirth">October 2, 1970 (1970-10-02) (age 38)</fact>
+<fact name="cityofbirth"><link entity_id="E0467057">Manchester</link></fact>
+<fact name="countryofbirth"><link entity_id="E0145816">England</link></fact>
+<fact name="position"><link>Midfielder</link></fact>
+<fact name="years">1989–1995
+1995
+1995–1998
+1998–1999
+1999–2000
+2000–2001</fact>
+<fact name="clubs"><link>Manchester City</link>
+→ <link>Wrexham</link> (loan) <link entity_id="E0640710">Hull City</link> <link>Altrincham</link> <link entity_id="E0640710">Hull City</link> <link>Northwich Victoria</link> <link>Bradford Park Avenue</link></fact>
+<fact name="caps(goals)">12 (0) 0 4 (0)
+38 (3) 0 3 (0) 0 1 (0)</fact>
+</facts>
+<wiki_text><![CDATA[Mike Quigley (footballer)
+
+Mike Quigley (born 2 October 1970) is an English football midfielder.
+]]></wiki_text>
+</entity>
+<entity wiki_title="Theodore_Roberts" type="PER" id="E0000003" name="Theodore Roberts">
+<facts class="infobox actor">
+<fact name="birthdate">October 8, 1861 (1861-10-08)</fact>
+<fact name="birthplace"><link entity_id="E0068419">San Francisco, California</link>, <link>U.S.</link></fact>
+<fact name="deathdate">December 14, 1928 (aged 67) <link></link></fact>
+<fact name="deathplace"><link>Hollywood, California</link></fact>
+<fact name="restingplace">Hollywood Forever
+Pineland 124</fact>
+<fact name="occupation"><link>Film</link>, <link>stage</link> <link entity_id="E0239778">actor</link></fact>
+</facts>
+<wiki_text><![CDATA[Theodore Roberts
+
+Theodore Roberts the actor is not to be confused with author Theodore Goodridge
+Roberts, 1877-1953, who wrote the "The Harbor Master". Please see .
+
+Theodore Roberts (October 8, 1861, San Francisco, California – December 14,
+1928, Hollywood, California) was an American movie and stage actor. He was a
+stage actor decades before becoming lovable old man in silents. On stage in the
+1890s he acted with Fanny Davenport in her play called Gismonda (1894) and later
+in The Bird of Paradise (1912) with actress Laurette Taylor.
+
+He started his film career in the 1910s in Hollywood, and was often was
+associated in the productions of Cecil B. DeMille.
+
+ Selected filmography
+]]></wiki_text>
+</entity>
+<entity wiki_title="Tseung_Kwan_O_New_Town" type="GPE" id="E0000010" name="Tseung Kwan O New Town">
+<facts class="Infobox Hong Kong new town">
+<fact name="name">Tseung Kwan O 將軍澳</fact>
+<fact name="area">10.05</fact>
+<fact name="population">290,095</fact>
+<fact name="population_as_of">2001</fact>
+<fact name="density">28,865</fact>
+<fact name="development year">Late 1980s</fact>
+<fact name="district">Sai Kung District</fact>
+<fact name="url">[1]</fact>
+</facts>
+<wiki_text><![CDATA[Tseung Kwan O New Town
+
+Tseung Kwan O New Town (traditional Chinese: 將軍澳新市鎮) is one of the nine new
+towns in Hong Kong, mainly built on reclaimed land in the northern half of the
+Tseung Kwan O, after which it is named.
+
+ Geography
+
+Although lying within Sai Kung District in the southeastern New Territories, the
+new town is often incorrectly regarded as part of Kowloon due to its close
+proximity to the city. The total development area of Tseung Kwan O, including
+its industrial estate, is about 10.05 km².
+
+ History and urban development
+
+The Hong Kong Government had been interested in developing a new town at Hang
+Hau because of its proximity to the urban area. The project was postponed for a
+long time owing to the extensive scale of reclamation in the bay, which is
+rather deep. It finally started under the name of Tseung Kwan O.
+
+The New Town was developed in three phases. The first phase encompassing
+Northern Tseung Kwan O, which includes Po Lam MTR Station and Hang Hau Station,
+while the second and third phase encompassing Southern Tseung Kwan O, which
+includes Tseung Kwan O Station (Town Centre) and Tiu Keng Leng Station.
+
+The planning of the new town has been centred along the MTR-corridor, with more
+than 80% of the population living within 5 minutes of an MTR station, with huge
+residential complexes surrounding the MTR stations. As most of the residential
+complexes surrounds the MTR station, there are huge parks in the rest of Tseung
+Kwan O New Town.
+
+ Population
+
+According to , the population of Tseung Kwan O New Town is around 290,095.
+
+As Tseung Kwan O is not considered a formal entity in the census, the above
+population figure takes into account residents of the following breakdown
+figures in Sai Kung District which comprise Tseung Kwan O New Town: Hang Hau,
+Sheung Tak, Tsui Lam, Hong King, Po Lam, Yan Ying, Wan Hang, King Lam, Hau Tak,
+Fu Yu, Tung Ming, On Hong, and Kwon Ming.
+
+The other three census areas in Sai Kung District - namely Sai Kung Central, Pak
+Sha Wan, and Sai Kung Islands - are not within the new town.
+
+ Facilities
+
+Tseung Kwan O Hospital is located on Po Ning Lane in the Hang Hau area. A public
+sports centre and a library are situated by the roundabout at the end of Tseung
+Kwan O Tunnel Road. Tseung Kwan O lacks a performing arts centre.
+
+ Sports
+
+Tseung Kwan O Sports Ground is being built for the 2009 East Asian Games. It
+will be completed in early 2009 and will also host Hong Kong First Division
+League matches.
+
+ Shopping
+
+Tseung Kwan O has several major shopping complexes:
+
+The largest shopping centre is Metro City (Chinese: 新都城) located by Po Lam MTR
+Station. Metro City is divided into three phases and contains most of Hong
+Kong's major chains such as Park'n Shop (supermarket) and Fortress (electronics)
+in addition to a selection of restaurants ranging from Maxim's Chinese
+Restaurant to McDonald's and everything in between.
+
+Hang Hau MTR Station is surrounded by an extensive network of mid-sized shopping
+arcades linked by footbridges. The mainstay of this multifarious complex is the
+Jusco department store at East Point City (Chinese: 東港城).
+
+Tseung Kwan O Town Centre (Tseung Kwan O MTR Station) is home to Park Central
+(Chinese: 將軍澳中心) and Tseung Kwan O Plaza (Chinese: 將軍澳廣場). Both complexes are
+very new and relatively underdeveloped with little more than a handful of
+restaurants and small shops.
+
+ Industrial estate
+
+Tseung Kwan O Industrial Estate is located in the southeast of the town. It is
+the site of an MTR depot and TVB City, the headquarters of Hong Kong's largest
+television broadcaster. The future mass housing development Dream City will be
+built just north of the industrial estate.
+
+Bus routes 797M (NWFB) and 298E (KMB) connect the industrial estate to southern
+Tseung Kwan O. A spur line of the MTR's Tseung Kwan O Line is already under
+construction and, when completed, will provide easy access to the industrial
+estate from Kowloon and Hong Kong Island.
+
+ Transport
+
+ Rail
+
+Tseung Kwan O is served by the MTR metro systems's Tseung Kwan O Line, which
+currently has four stations in the new town:
+
+All stations are either connected to or in the proximity of shopping centres and
+large private housing developments.
+
+ Bus
+
+The new town is also connected by a well-covered public bus and minibus network.
+Hong Kong's three major bus operators all have routes with termini in Tseung
+Kwan O:
+
+ Roads
+
+Several main roads lead to Tseung Kwan O:
+
+ Photo gallery
+]]></wiki_text>
+</entity>
+</knowledge_base>

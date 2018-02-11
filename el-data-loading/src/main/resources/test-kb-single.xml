@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<knowledge_base>
+<entity wiki_title="Theodore_Roberts" type="PER" id="E0000003" name="Theodore Roberts">
+<facts class="infobox actor">
+<fact name="birthdate">October 8, 1861 (1861-10-08)</fact>
+<fact name="birthplace"><link entity_id="E0068419">San Francisco, California</link>, <link>U.S.</link></fact>
+<fact name="deathdate">December 14, 1928 (aged 67) <link></link></fact>
+<fact name="deathplace"><link>Hollywood, California</link></fact>
+<fact name="restingplace">Hollywood Forever
+Pineland 124</fact>
+<fact name="occupation"><link>Film</link>, <link>stage</link> <link entity_id="E0239778">actor</link></fact>
+</facts>
+<wiki_text><![CDATA[Theodore Roberts
+
+Theodore Roberts the actor is not to be confused with author Theodore Goodridge
+Roberts, 1877-1953, who wrote the "The Harbor Master". Please see .
+
+Theodore Roberts (October 8, 1861, San Francisco, California – December 14,
+1928, Hollywood, California) was an American movie and stage actor. He was a
+stage actor decades before becoming lovable old man in silents. On stage in the
+1890s he acted with Fanny Davenport in her play called Gismonda (1894) and later
+in The Bird of Paradise (1912) with actress Laurette Taylor.
+
+He started his film career in the 1910s in Hollywood, and was often was
+associated in the productions of Cecil B. DeMille.
+
+ Selected filmography
+]]></wiki_text>
+</entity>
+</knowledge_base>

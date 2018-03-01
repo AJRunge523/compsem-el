@@ -1,5 +1,10 @@
 package com.arunge.el.api;
 
-public class EntityType {
+public enum EntityType {
 
+    PERSON,
+    GPE,
+    ORG,
+    UNK
+    
 }

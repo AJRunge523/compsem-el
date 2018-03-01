@@ -1,18 +1,16 @@
 package com.arunge.el.mongo.ingest;
 
+import static com.mongodb.client.model.Filters.eq;
+
+import java.util.Iterator;
+import java.util.Optional;
+
 import org.bson.Document;
 
 import com.arunge.el.api.KBDocument;
+import com.arunge.unmei.iterators.Iterators;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.or;
-
-import java.util.Optional;
 
 public class MongoKnowledgeBaseStore {
 
@@ -38,6 +36,10 @@ public class MongoKnowledgeBaseStore {
             return Optional.empty();
         }
         return Optional.of(MongoKBDocumentConverter.toKBDocument(d));
+    }
+    
+    public Iterator<KBDocument> all() {
+        return Iterators.map(coll.find().noCursorTimeout(true).iterator(), d -> MongoKBDocumentConverter.toKBDocument(d));
     }
     
 }

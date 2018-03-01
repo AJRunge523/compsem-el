@@ -10,6 +10,7 @@
   <modules>
   	<module>el-data-loading</module>
   	<module>el-core</module>
+  	<module>el-processing</module>
   </modules>
   <dependencyManagement>
     <dependencies>

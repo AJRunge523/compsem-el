@@ -15,7 +15,7 @@ public class KBDocumentTextProcessor {
 
     private NLPPreprocessingPipeline pipeline;
     
-    Annotator[] FULL_ANNOTATORS = {/*Annotator.DEPPARSE, Annotator.POS, Annotator.NER, Annotator.LEMMA*/};
+    Annotator[] FULL_ANNOTATORS = {Annotator.POS, Annotator.LEMMA, Annotator.DEPPARSE, Annotator.NER/*Annotator.DEPPARSE, Annotator.POS, Annotator.NER, Annotator.LEMMA*/};
     
     public KBDocumentTextProcessor() {
         this.pipeline = new StanfordNLPPreprocessingPipeline(FULL_ANNOTATORS);
@@ -32,7 +32,7 @@ public class KBDocumentTextProcessor {
         TextDocument textDoc = new TextDocument(document.getId(), text);
         PreprocessedTextDocument processed = pipeline.apply(textDoc);
         for(PreprocessedTextField field : processed.getTextFields().values()) {
-            System.out.println(field.render());
+            System.out.println(field.render(FULL_ANNOTATORS));
         }
         return output;
     }

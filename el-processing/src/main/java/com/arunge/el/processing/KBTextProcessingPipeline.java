@@ -13,6 +13,7 @@ public class KBTextProcessingPipeline {
         MongoKnowledgeBaseStore store = new MongoKnowledgeBaseStore(client, "tackbp");
         Iterator<KBDocument> iter = store.all();
         iter.next();
+        iter.next();
         KBDocument d = iter.next();
         KBDocumentTextProcessor processor = new KBDocumentTextProcessor();
         processor.process(d);

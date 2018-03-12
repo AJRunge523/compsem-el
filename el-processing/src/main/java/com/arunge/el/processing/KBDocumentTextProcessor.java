@@ -2,7 +2,6 @@ package com.arunge.el.processing;
 
 import java.util.Arrays;
 
-import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBDocument;
 import com.arunge.nlp.api.Annotator;
 import com.arunge.nlp.api.NLPPreprocessingPipeline;
@@ -23,7 +22,7 @@ public class KBDocumentTextProcessor {
 
     public NLPKBDocument process(KBDocument document) {
         NLPKBDocument output = new NLPKBDocument(document.getId());
-        output.setType(parseType(document.getEntityType()));
+        output.setTitle(document.getName());
         String text = Arrays.stream(document.getDocText().split("\n\n"))
                 .filter(t -> t.split(" ").length >= 5).reduce((a, b) -> a + "\n" + b)
                 .get();
@@ -36,18 +35,5 @@ public class KBDocumentTextProcessor {
         }
         return output;
     }
-    
-    private EntityType parseType(String eType) {
-        if(eType.toLowerCase().equals("per")) {
-            return EntityType.PERSON;
-        } else if(eType.toLowerCase().equals("gpe")) {
-            return EntityType.GPE;
-        } else if(eType.toLowerCase().equals("org")) {
-            return EntityType.ORG;
-        } else {
-            return EntityType.UNK;
-        }
-    }
-    
     
 }

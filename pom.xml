@@ -1,5 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>com.arunge.el</groupId>
   <artifactId>compsem-el</artifactId>
   <packaging>pom</packaging>
   <parent>
@@ -8,15 +9,36 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <modules>
+    <module>el-core</module>
   	<module>el-data-loading</module>
-  	<module>el-core</module>
+  	<module>el-mongo-entity-store</module>
   	<module>el-processing</module>
   </modules>
   <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>com.arunge</groupId>
+            <groupId>com.arunge.el</groupId>
             <artifactId>el-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.arunge.el</groupId>
+            <artifactId>el-data-loading</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.arunge.el</groupId>
+            <artifactId>el-mongo-entity-store</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.arunge.el</groupId>
+            <artifactId>el-processing</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.arunge</groupId>
+            <artifactId>unmei-iterators</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

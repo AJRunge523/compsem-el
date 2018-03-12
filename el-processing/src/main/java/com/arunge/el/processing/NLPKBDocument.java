@@ -9,6 +9,7 @@ public class NLPKBDocument {
 
     private String docId;
     private EntityType type;
+    private String title;
         /* List of sentences containing annotated tokens */
     private List<List<AnnotatedToken>> tokens;
     
@@ -38,6 +39,14 @@ public class NLPKBDocument {
 
     public void setTokens(List<List<AnnotatedToken>> tokens) {
         this.tokens = tokens;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
     
     

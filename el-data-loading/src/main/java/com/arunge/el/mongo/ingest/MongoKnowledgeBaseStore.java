@@ -2,17 +2,19 @@ package com.arunge.el.mongo.ingest;
 
 import static com.mongodb.client.model.Filters.eq;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 import org.bson.Document;
 
 import com.arunge.el.api.KBDocument;
+import com.arunge.el.api.KnowledgeBaseStore;
+import com.arunge.unmei.iterators.CloseableIterator;
+import com.arunge.unmei.iterators.CloseableIterators;
 import com.arunge.unmei.iterators.Iterators;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 
-public class MongoKnowledgeBaseStore {
+public class MongoKnowledgeBaseStore implements KnowledgeBaseStore {
 
     private MongoCollection<Document> coll;
     
@@ -38,8 +40,8 @@ public class MongoKnowledgeBaseStore {
         return Optional.of(MongoKBDocumentConverter.toKBDocument(d));
     }
     
-    public Iterator<KBDocument> all() {
-        return Iterators.map(coll.find().noCursorTimeout(true).iterator(), d -> MongoKBDocumentConverter.toKBDocument(d));
+    public CloseableIterator<KBDocument> all() {
+        return CloseableIterators.wrap(Iterators.map(coll.find().noCursorTimeout(true).iterator(), MongoKBDocumentConverter::toKBDocument));
     }
     
 }

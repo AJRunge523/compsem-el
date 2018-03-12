@@ -5,24 +5,16 @@
     <artifactId>compsem-el</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>el-core</artifactId>
+  <artifactId>el-mongo-entity-store</artifactId>
   <dependencies>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
+    <dependency>
+        <groupId>com.arunge.el</groupId>
+        <artifactId>el-core</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.arunge</groupId>
-        <artifactId>unmei-iterators</artifactId>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongo-java-driver</artifactId>
     </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-    </dependency>
+    
   </dependencies>
-  
 </project>

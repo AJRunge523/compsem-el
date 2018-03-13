@@ -1,34 +1,79 @@
 package com.arunge.el.processing;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.arunge.el.api.ELQuery;
 import com.arunge.el.api.EntityStore;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.google.common.collect.Sets;
 import com.mongodb.MongoClient;
 
+/**
+ * 
+ *<p>Main access point for processing an Entity Linking dataset.<p>
+ *
+ * @author Andrew Runge
+ *
+ */
 public class EntityLinkingPipeline {
 
     public static void main(String[] args) {
-        String queryString = "Baltimore City";
-        KBEntity query = new KBEntity();
-        query.setCanonicalName(queryString);
-        Set<String> words = new HashSet<>();
-        words.add("Baltimore");
-        words.add("City");
-        query.setNameUnigrams(words);
         EntityStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
         EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
-        Stream<KBEntity> entities = candidateRetrieval.retrieveCandidates(query);
-        ScoredEntity best = entities.map(e -> scoreEntity(query, e)).sorted().findFirst().get();
-        System.out.println(best.getEntity().getId() + " --> " + best.getEntity().getCanonicalName());
+        List<ELQueryTransformer> transformers = new ArrayList<>();
+        transformers.add(new SimpleELQueryTransformer());
+        
+        int numCorrect = 0;
+        int numNonNilCorrect = 0;
+        int numNil = 0;
+        int numNonNil = 0;
+        int nilCorrect = 0;
+        int total = 0;
+        Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
+        for(ELQuery query : queries) {
+            
+//            System.out.println(query.getQueryId() + " " + query.getName());
+            KBEntity queryEntity = new KBEntity();
+
+            for(ELQueryTransformer transformer : transformers) { 
+                transformer.transform(queryEntity, query);
+            }
+            System.out.println(queryEntity.getName());
+
+            Stream<KBEntity> entities = candidateRetrieval.retrieveCandidates(queryEntity);
+            Optional<ScoredEntity> best = entities.map(e -> scoreEntity(queryEntity, e)).sorted().findFirst();
+            if(best.isPresent()) {
+                ScoredEntity bestEnt = best.get();
+                System.out.println(queryEntity.getMeta("gold").get() + "\t" + bestEnt.getEntity().getId() + "\t" + bestEnt.getEntity().getName());
+                if(queryEntity.getMeta("gold").get().equals(bestEnt.getEntity().getId())) {
+                    numCorrect += 1;
+                    numNonNilCorrect += 1;
+                }
+                numNonNil += 1;
+            } else {
+                if(queryEntity.getMeta("gold").get().equals("NIL")) {
+                    nilCorrect += 1;
+                    numCorrect += 1;
+                }
+                numNil += 1;
+                System.out.println(queryEntity.getMeta("gold").get() + "\t" + "NIL");
+            }
+            total += 1;
+        }
+        System.out.println("# non NIL correct: " + numNonNilCorrect + " out of " + numNonNil);
+        System.out.println("# NIL correct: " + nilCorrect + " out of " + numNil);
+        System.out.println("Total correct: " + numCorrect + " out of " + total);
+        
+        
     }
     
     private static ScoredEntity scoreEntity(KBEntity query, KBEntity kbEntry) {
-        int score = Sets.intersection(query.getNameUnigrams(), kbEntry.getNameUnigrams()).size();
+        int score = Sets.intersection(query.getNameUnigrams().get(), kbEntry.getNameUnigrams().get()).size();
         return new ScoredEntity(score, kbEntry);
     }
     

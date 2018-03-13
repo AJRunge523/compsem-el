@@ -1,44 +1,48 @@
 package com.arunge.el.processing;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.arunge.el.api.EntityQuery;
 import com.arunge.el.api.EntityStore;
 import com.arunge.el.api.KBEntity;
-import com.arunge.nlp.api.Token;
-import com.arunge.nlp.api.Tokenizer;
-import com.arunge.nlp.stanford.Tokenizers;
 import com.arunge.unmei.iterators.Iterators;
 
+/**
+ * 
+ *<p>Engine for retrieving candidate {@link KBEntity} objects for a given query.</p>
+ * Candidate retrieval is handled separately in order to more easily facilitate
+ * enabling and disabling the features used throughout the pipeline, both at retrieval
+ * and at candidate evaluation.
+ *
+ * @author Andrew Runge
+ *
+ */
 public class EntityCandidateRetrievalEngine {
 
     private EntityStore store;
     
-    private Tokenizer tokenizer;
     
     public EntityCandidateRetrievalEngine(EntityStore store) { 
         this.store = store;
-        this.tokenizer = Tokenizers.getDefaultFiltered();
     }
     
     public Stream<KBEntity> retrieveCandidates(KBEntity queryEntity) {
         EntityQuery.Builder queryBuilder = EntityQuery.builder();
         List<String> names = new ArrayList<>();
-        names.add(queryEntity.getCanonicalName());
-        for(String alias : queryEntity.getAliases()) {
-            names.add(alias);
+        names.add(queryEntity.getName());
+        names.add(queryEntity.getCleansedName());
+        Optional<Set<String>> aliases = queryEntity.getAliases();
+        if(aliases.isPresent()) {
+            names.addAll(aliases.get());
         }
         queryBuilder = queryBuilder.withNameVariants(names);
-        Set<String> nameUnigrams = new HashSet<>();
-        for(String name : names) {
-            Stream<Token> tokens = tokenizer.tokenize(name);
-            tokens.forEach(t -> nameUnigrams.add(t.text()));
+        if(queryEntity.getNameUnigrams().isPresent()) {
+            queryBuilder = queryBuilder.withNameUnigrams(queryEntity.getNameUnigrams().get());
         }
-        queryBuilder.withNameUnigrams(nameUnigrams);
         return Iterators.toStream(store.query(queryBuilder.build()));
     }
     

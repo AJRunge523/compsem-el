@@ -8,6 +8,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.or;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,9 +80,18 @@ public class MongoEntityStore implements EntityStore {
         for(String token : query.getNameUnigrams()) {
             tokenFilters.add(eq(NAME_UNIGRAMS, token));
         }
-        System.out.println(nameFilters.size() + ", " + tokenFilters.size());
-        Bson mongoQuery = or(or(nameFilters), or(tokenFilters));
-        return CloseableIterators.wrap(Iterators.map(coll.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
+        List<Bson> filters = new ArrayList<>();
+        if(tokenFilters.size() > 0) {
+            filters.add(or(tokenFilters));
+        }
+        if(nameFilters.size() > 0) {
+            filters.add(or(nameFilters));
+        }
+        if(filters.size() > 0) { 
+            Bson mongoQuery = or(or(nameFilters), or(tokenFilters));
+            return CloseableIterators.wrap(Iterators.map(coll.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
+        }
+        return CloseableIterators.wrap(new ArrayList<KBEntity>(0).iterator());
     }
 
 }

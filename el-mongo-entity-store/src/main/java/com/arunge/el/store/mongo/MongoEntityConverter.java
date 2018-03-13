@@ -9,9 +9,7 @@ import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
 import static com.arunge.el.store.mongo.MongoEntityFields.TYPE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 
@@ -23,9 +21,9 @@ public class MongoEntityConverter {
     public static Document toMongoDocument(KBEntity e) {
         Document document = new Document();
         document.append(ID, e.getId());
-        document.append(KB_NAME, e.getKbName());
-        document.append(CANONICAL_NAME, e.getCanonicalName());
-        document.append(ALIASES, Arrays.stream(e.getAliases()).collect(Collectors.toList()));
+        document.append(KB_NAME, e.getName());
+        document.append(CANONICAL_NAME, e.getCleansedName());
+        document.append(ALIASES, e.getAliases());
         document.append(TYPE, e.getType().name().charAt(0));
         document.append(NAME_UNIGRAMS, e.getNameUnigrams());
         document.append(NAME_BIGRAMS, e.getNameBigrams());
@@ -36,8 +34,8 @@ public class MongoEntityConverter {
     public static KBEntity toEntity(Document d) {
         KBEntity e = new KBEntity();
         e.setId(d.getString(ID));
-        e.setKbName(d.getString(KB_NAME));
-        e.setCanonicalName(d.getString(CANONICAL_NAME));
+        e.setName(d.getString(KB_NAME));
+        e.setCleansedName(d.getString(CANONICAL_NAME));
         ArrayList<String> aliases = (ArrayList<String>) d.get(ALIASES);
         e.setAliases(aliases.stream().toArray(String[]::new));
         String typeStart = d.getString(TYPE);

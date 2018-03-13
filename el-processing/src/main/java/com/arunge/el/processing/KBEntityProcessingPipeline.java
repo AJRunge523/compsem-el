@@ -94,8 +94,8 @@ public class KBEntityProcessingPipeline {
     private KBEntity convert(NLPKBDocument doc) {
         KBEntity entity = new KBEntity();
         entity.setId(doc.getDocId());
-        entity.setKbName(doc.getTitle());
-        entity.setCanonicalName(cleanCanonicalName(doc.getTitle()));
+        entity.setName(doc.getTitle());
+        entity.setCleansedName(cleanCanonicalName(doc.getTitle()));
         entity.setType(doc.getType());
         addNameNgrams(entity);
         return entity;
@@ -107,9 +107,12 @@ public class KBEntityProcessingPipeline {
      */
     private void addNameNgrams(KBEntity entity) {
         List<String> names = new ArrayList<>();
-        names.add(entity.getCanonicalName());
-        names.add(entity.getKbName());
-        names.addAll(Arrays.stream(entity.getAliases()).collect(Collectors.toList()));
+        names.add(entity.getCleansedName());
+        names.add(entity.getName());
+        Optional<Set<String>> aliases = entity.getAliases();
+        if(aliases.isPresent()) { 
+            names.addAll(aliases.get());
+        }
         Set<String> unigrams = new HashSet<>();
         Set<String> bigrams = new HashSet<>();
         for(String name : names) {

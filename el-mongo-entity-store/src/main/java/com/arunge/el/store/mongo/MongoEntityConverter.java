@@ -38,7 +38,8 @@ public class MongoEntityConverter {
         e.setId(d.getString(ID));
         e.setKbName(d.getString(KB_NAME));
         e.setCanonicalName(d.getString(CANONICAL_NAME));
-        e.setAliases((String[]) d.get(ALIASES));
+        ArrayList<String> aliases = (ArrayList<String>) d.get(ALIASES);
+        e.setAliases(aliases.stream().toArray(String[]::new));
         String typeStart = d.getString(TYPE);
         if(typeStart.equals("P")) {
             e.setType(EntityType.PERSON);

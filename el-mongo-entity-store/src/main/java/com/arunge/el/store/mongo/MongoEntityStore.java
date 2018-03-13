@@ -1,10 +1,18 @@
 package com.arunge.el.store.mongo;
 
+import static com.arunge.el.store.mongo.MongoEntityFields.CANONICAL_NAME;
+import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
+import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
+import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.or;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.bson.Document;
-
-import static com.mongodb.client.model.Filters.eq;
+import org.bson.conversions.Bson;
 
 import com.arunge.el.api.EntityQuery;
 import com.arunge.el.api.EntityStore;
@@ -15,11 +23,6 @@ import com.arunge.unmei.iterators.Iterators;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Indexes;
-
-import static com.arunge.el.store.mongo.MongoEntityFields.CANONICAL_NAME;
-import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
-import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
-import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
 
 /**
  * 
@@ -68,7 +71,17 @@ public class MongoEntityStore implements EntityStore {
 
     @Override
     public CloseableIterator<KBEntity> query(EntityQuery query) {
-        throw new UnsupportedOperationException("not yet implemented.");
+        List<Bson> nameFilters = new ArrayList<>();
+        for(String name : query.getNameVariants()) {
+            nameFilters.add(eq(CANONICAL_NAME, name));
+        }
+        List<Bson> tokenFilters = new ArrayList<>();
+        for(String token : query.getNameUnigrams()) {
+            tokenFilters.add(eq(NAME_UNIGRAMS, token));
+        }
+        System.out.println(nameFilters.size() + ", " + tokenFilters.size());
+        Bson mongoQuery = or(or(nameFilters), or(tokenFilters));
+        return CloseableIterators.wrap(Iterators.map(coll.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
     }
 
 }

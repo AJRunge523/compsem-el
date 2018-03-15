@@ -2,7 +2,7 @@ package com.arunge.el.processing;
 
 import java.util.Arrays;
 
-import com.arunge.el.api.KBDocument;
+import com.arunge.el.api.TextEntity;
 import com.arunge.nlp.api.Annotator;
 import com.arunge.nlp.api.NLPPreprocessingPipeline;
 import com.arunge.nlp.stanford.StanfordNLPPreprocessingPipeline;
@@ -20,7 +20,7 @@ public class KBDocumentTextProcessor {
         this.pipeline = new StanfordNLPPreprocessingPipeline(FULL_ANNOTATORS);
     }
 
-    public NLPKBDocument process(KBDocument document) {
+    public NLPKBDocument process(TextEntity document) {
         NLPKBDocument output = new NLPKBDocument(document.getId());
         output.setTitle(document.getName());
         String text = Arrays.stream(document.getDocText().split("\n\n"))

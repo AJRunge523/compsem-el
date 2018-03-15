@@ -23,10 +23,6 @@ public class TACParser extends DefaultHandler {
     private String currentVal;
     private String sourceDir;
     
-    private boolean sName = false;
-    private boolean sId = false;
-    private boolean sEntity = false;
-    
     public TACParser() { 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -44,13 +40,7 @@ public class TACParser extends DefaultHandler {
             currentQuery = new ELQuery();
             String id = attributes.getValue("id");
             currentQuery.setQueryId(id);
-        } else if(qName.equals("name")) {
-            sName = true;
-        } else if(qName.equals("docid")) {
-            sId = true;
-        } else if(qName.equals("entity")) {
-            sEntity = true;
-        }
+        } 
     }
     
     @Override
@@ -66,13 +56,10 @@ public class TACParser extends DefaultHandler {
             currentQuery = null;
         } else if(qName.equals("name")) {
             currentQuery.setName(currentVal);
-            sName = false;
         } else if(qName.equals("docid")) {
             currentQuery.setDocPath(Paths.get(sourceDir, currentVal).toString());
-            sId = false;
         } else if(qName.equals("entity")) {
             currentQuery.setGoldEntity(currentVal);
-            sEntity = false;
         }
         currentVal = "";
     }
@@ -83,7 +70,7 @@ public class TACParser extends DefaultHandler {
         try {
             parser.parse(queryFile, this);
         } catch (SAXException | IOException e) {
-            throw new RuntimeException("Failed to parse query file: ." + queryFile.getAbsolutePath(), e);
+            throw new RuntimeException("Failed to parse query file: " + queryFile.getAbsolutePath(), e);
         }
         return currentQueries;
     }

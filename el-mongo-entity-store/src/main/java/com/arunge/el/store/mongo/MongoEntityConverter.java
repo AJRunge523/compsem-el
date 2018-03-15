@@ -23,10 +23,10 @@ public class MongoEntityConverter {
         document.append(ID, e.getId());
         document.append(KB_NAME, e.getName());
         document.append(CANONICAL_NAME, e.getCleansedName());
-        document.append(ALIASES, e.getAliases());
+        document.append(ALIASES, e.getAliases().orElse(new HashSet<>()));
         document.append(TYPE, e.getType().name().charAt(0));
-        document.append(NAME_UNIGRAMS, e.getNameUnigrams());
-        document.append(NAME_BIGRAMS, e.getNameBigrams());
+        document.append(NAME_UNIGRAMS, e.getNameUnigrams().orElse(new HashSet<>()));
+        document.append(NAME_BIGRAMS, e.getNameBigrams().orElse(new HashSet<>()));
         return document;
     }
     

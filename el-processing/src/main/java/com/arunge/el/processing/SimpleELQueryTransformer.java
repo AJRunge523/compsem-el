@@ -21,12 +21,19 @@ public class SimpleELQueryTransformer implements ELQueryTransformer {
     
     public void transform(KBEntity entity, ELQuery query) {
         entity.setName(query.getName());
-        entity.setCleansedName(query.getName().toLowerCase());
+        String cleansedName = cleanCanonicalName(query.getName());
+        entity.setCleansedName(cleansedName);
         Set<String> nameUnigrams = new HashSet<>();
-        Stream<Token> tokens = tokenizer.tokenize(query.getName());
+        Stream<Token> tokens = tokenizer.tokenize(cleansedName);
         tokens.forEach(t -> nameUnigrams.add(t.text()));
         entity.setNameUnigrams(nameUnigrams);
         entity.addMeta("gold", query.getGoldEntity());
     }
     
+    private String cleanCanonicalName(String name) {
+        String clean = name.replaceAll("\\(.*\\)", "");
+        clean = clean.replaceAll("\\p{Punct}", "");
+        clean = clean.toLowerCase();
+        return clean;
+    }
 }

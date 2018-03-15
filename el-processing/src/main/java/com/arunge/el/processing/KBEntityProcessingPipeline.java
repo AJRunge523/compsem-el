@@ -1,7 +1,6 @@
 package com.arunge.el.processing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,13 +13,11 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.arunge.el.api.EntityStore;
+import com.arunge.el.api.EntityKBStore;
+import com.arunge.el.api.EntityMetadataKeys;
 import com.arunge.el.api.EntityType;
-import com.arunge.el.api.KBDocument;
+import com.arunge.el.api.TextEntity;
 import com.arunge.el.api.KBEntity;
-import com.arunge.el.api.KnowledgeBaseStore;
-import com.arunge.nlp.api.Token;
-import com.arunge.nlp.api.TokenFilters.TokenFilter;
 import com.arunge.nlp.api.Tokenizer;
 import com.arunge.nlp.stanford.Tokenizers;
 import com.arunge.unmei.iterators.Iterators;
@@ -29,25 +26,20 @@ public class KBEntityProcessingPipeline {
 
     private static Logger LOG = LoggerFactory.getLogger(KBEntityProcessingPipeline.class);
     
-    private KnowledgeBaseStore kb;
-    private EntityStore entityStore;
+    private EntityKBStore entityStore;
     private int processed = 0;
     private Map<String, Integer> unkCounts;
     private Tokenizer tokenizer;
-    private List<TokenFilter> filters;
-//    private KBDocumentTextProcessor processor;
     
     
-    public KBEntityProcessingPipeline(KnowledgeBaseStore kb, EntityStore entityStore) {
-        this.kb = kb;
+    public KBEntityProcessingPipeline(EntityKBStore entityStore) {
         this.entityStore = entityStore;
         this.unkCounts = new HashMap<>();
         this.tokenizer = Tokenizers.getDefaultFiltered();
-//        this.processor = processor;
     }
     
     public void process() {
-        Stream<KBDocument> kbIter = Iterators.toStream(kb.all());
+        Stream<TextEntity> kbIter = Iterators.toStream(entityStore.allKBText());
         //TODO: Before conversion, these documents will be heavily processed to perform feature extraction
         kbIter.map(d -> process(d))
               .filter(d -> d.isPresent())
@@ -71,12 +63,12 @@ public class KBEntityProcessingPipeline {
      * @param doc
      * @return
      */
-    private Optional<NLPKBDocument> process(KBDocument document) { 
+    private Optional<NLPKBDocument> process(TextEntity document) { 
         NLPKBDocument output = new NLPKBDocument(document.getId());
-        EntityType type = parseType(document.getEntityType(), document.getInfoboxType());
+        String infoboxType = document.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE);
+        EntityType type = parseType(document.getEntityType(), infoboxType);
         if(type.equals(EntityType.UNK)) {
-            String ibType = document.getInfoboxType().toLowerCase();
-            unkCounts.compute(ibType, (k, v) -> (v == null) ? 1 : v+1);
+            unkCounts.compute(infoboxType, (k, v) -> (v == null) ? 1 : v+1);
             return Optional.empty();
         }
         output.setType(type);
@@ -87,6 +79,7 @@ public class KBEntityProcessingPipeline {
     private String cleanCanonicalName(String name) {
         String clean = name.replaceAll("\\(.*\\)", "");
         clean = clean.replaceAll("\\p{Punct}", "");
+        clean = clean.toLowerCase();
         return clean;
     }
     
@@ -116,14 +109,14 @@ public class KBEntityProcessingPipeline {
         Set<String> unigrams = new HashSet<>();
         Set<String> bigrams = new HashSet<>();
         for(String name : names) {
-            List<Token> tokens = tokenizer.tokenizeToList(name);
+            List<String> tokens = tokenizer.tokenize(name).map(t -> t.text().toLowerCase()).collect(Collectors.toList());
             if(tokens.size() == 0) {
                 continue;
             }
-            unigrams.add(tokens.get(0).text());
+            unigrams.add(tokens.get(0));
             for(int i = 1; i < tokens.size(); i++) {
-                unigrams.add(tokens.get(i).text());
-                bigrams.add(tokens.get(i - 1).text() + " " + tokens.get(i).text());
+                unigrams.add(tokens.get(i));
+                bigrams.add(tokens.get(i - 1) + " " + tokens.get(i));
             }
         }
         entity.setNameUnigrams(unigrams);

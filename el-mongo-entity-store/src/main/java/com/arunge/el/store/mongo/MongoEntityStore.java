@@ -8,7 +8,6 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.or;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,60 +15,93 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.arunge.el.api.EntityQuery;
-import com.arunge.el.api.EntityStore;
+import com.arunge.el.api.TextEntity;
+import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
 import com.arunge.unmei.iterators.CloseableIterator;
 import com.arunge.unmei.iterators.CloseableIterators;
 import com.arunge.unmei.iterators.Iterators;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Indexes;
 
 /**
  * 
- *<p>Mongo-backed implementation of the {@link EntityStore}.<p>
+ *<p>Mongo-backed implementation of the {@link EntityKBStore}.<p>
  *
  * @author Andrew Runge
  *
  */
-public class MongoEntityStore implements EntityStore {
+public class MongoEntityStore implements EntityKBStore {
 
-    MongoCollection<Document> coll;
     
-    public MongoEntityStore(MongoClient client, String dbName) { 
-        this.coll = client.getDatabase(dbName).getCollection("entities");
-        this.coll.createIndex(Indexes.descending(CANONICAL_NAME));
-        this.coll.createIndex(Indexes.descending(KB_NAME));
-        this.coll.createIndex(Indexes.descending(NAME_BIGRAMS));
-        this.coll.createIndex(Indexes.descending(NAME_UNIGRAMS));
+    MongoCollection<Document> docs;
+    MongoCollection<Document> nlpDocs;
+    MongoCollection<Document> entities;
+    
+    public MongoEntityStore(MongoClient client, String dbName) {
+        MongoDatabase db = client.getDatabase(dbName);
+        this.docs = db.getCollection("docs");
+        this.nlpDocs = db.getCollection("nlp_docs");
+        this.entities = db.getCollection("entities");
+        this.entities.createIndex(Indexes.descending(CANONICAL_NAME));
+        this.entities.createIndex(Indexes.descending(KB_NAME));
+        this.entities.createIndex(Indexes.descending(NAME_BIGRAMS));
+        this.entities.createIndex(Indexes.descending(NAME_UNIGRAMS));
 
     }
     
     @Override
+    public String insert(TextEntity doc) {
+        Document d = docs.find(eq("_id", doc.getId())).first();
+        if(d != null) {
+            return doc.getId();
+        }
+        Document mongoDoc = MongoKBDocumentConverter.toMongoDocument(doc);
+        docs.insertOne(mongoDoc);
+        return doc.getId();
+    }
+    
+    @Override
+    public Optional<TextEntity> fetchKBText(String id) {
+        Document d = docs.find(eq("_id", id)).first();
+        if(d == null) {
+            return Optional.empty();
+        }
+        return Optional.of(MongoKBDocumentConverter.toTextEntity(d));
+    }
+    
+    @Override
+    public CloseableIterator<TextEntity> allKBText() {
+        return CloseableIterators.wrap(Iterators.map(docs.find().noCursorTimeout(true).iterator(), MongoKBDocumentConverter::toTextEntity));
+    }    
+    
+    @Override
     public String insert(KBEntity entity) {
-        Document d = coll.find(eq("_id", entity.getId())).first();
+        Document d = entities.find(eq("_id", entity.getId())).first();
         if(d != null) {
             return entity.getId();
         }
         Document mongoDoc = MongoEntityConverter.toMongoDocument(entity);
-        coll.insertOne(mongoDoc);
+        entities.insertOne(mongoDoc);
         return entity.getId();
     }
 
     @Override
-    public Optional<KBEntity> fetch(String id) {
-        Document d = coll.find(eq("_id", id)).first();
+    public Optional<KBEntity> fetchEntity(String id) {
+        Document d = entities.find(eq("_id", id)).first();
         if(d == null) {
             return Optional.empty();
         } 
         return Optional.of(MongoEntityConverter.toEntity(d));
     }
-
+    
     @Override
-    public CloseableIterator<KBEntity> all() {
-        return CloseableIterators.wrap(Iterators.map(coll.find().noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
+    public CloseableIterator<KBEntity> allEntities() {
+        return CloseableIterators.wrap(Iterators.map(entities.find().noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
     }
-
+    
     @Override
     public CloseableIterator<KBEntity> query(EntityQuery query) {
         List<Bson> nameFilters = new ArrayList<>();
@@ -89,9 +121,14 @@ public class MongoEntityStore implements EntityStore {
         }
         if(filters.size() > 0) { 
             Bson mongoQuery = or(or(nameFilters), or(tokenFilters));
-            return CloseableIterators.wrap(Iterators.map(coll.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
+            return CloseableIterators.wrap(Iterators.map(entities.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
         }
         return CloseableIterators.wrap(new ArrayList<KBEntity>(0).iterator());
     }
 
+    @Override
+    public void clearEntities() { 
+        entities.drop();
+    }
+    
 }

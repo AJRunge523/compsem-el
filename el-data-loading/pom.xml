@@ -13,6 +13,10 @@
         <artifactId>el-core</artifactId>
     </dependency>
     <dependency>
+        <groupId>com.arunge.el</groupId>
+        <artifactId>el-mongo-entity-store</artifactId>
+    </dependency>
+    <dependency>
         <groupId>com.arunge</groupId>
         <artifactId>unmei-iterators</artifactId>
     </dependency>

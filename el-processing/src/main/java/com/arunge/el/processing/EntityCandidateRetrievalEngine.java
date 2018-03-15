@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.arunge.el.api.EntityQuery;
-import com.arunge.el.api.EntityStore;
+import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
 import com.arunge.unmei.iterators.Iterators;
 
@@ -23,10 +23,10 @@ import com.arunge.unmei.iterators.Iterators;
  */
 public class EntityCandidateRetrievalEngine {
 
-    private EntityStore store;
+    private EntityKBStore store;
     
     
-    public EntityCandidateRetrievalEngine(EntityStore store) { 
+    public EntityCandidateRetrievalEngine(EntityKBStore store) { 
         this.store = store;
     }
     

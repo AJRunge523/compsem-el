@@ -1,4 +1,4 @@
-package com.arunge.el.processing;
+package com.arunge.el.application;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.arunge.el.api.ELQuery;
-import com.arunge.el.api.EntityStore;
+import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.processing.ELQueryTransformer;
+import com.arunge.el.processing.EntityCandidateRetrievalEngine;
+import com.arunge.el.processing.SimpleELQueryTransformer;
 import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.google.common.collect.Sets;
@@ -23,7 +26,7 @@ import com.mongodb.MongoClient;
 public class EntityLinkingPipeline {
 
     public static void main(String[] args) {
-        EntityStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
+        EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
         EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
         List<ELQueryTransformer> transformers = new ArrayList<>();
         transformers.add(new SimpleELQueryTransformer());
@@ -46,6 +49,7 @@ public class EntityLinkingPipeline {
             System.out.println(queryEntity.getName());
 
             Stream<KBEntity> entities = candidateRetrieval.retrieveCandidates(queryEntity);
+            
             Optional<ScoredEntity> best = entities.map(e -> scoreEntity(queryEntity, e)).sorted().findFirst();
             if(best.isPresent()) {
                 ScoredEntity bestEnt = best.get();

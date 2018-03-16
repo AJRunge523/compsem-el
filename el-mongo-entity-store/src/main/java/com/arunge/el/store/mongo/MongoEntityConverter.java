@@ -32,8 +32,7 @@ public class MongoEntityConverter {
     
     @SuppressWarnings("unchecked")
     public static KBEntity toEntity(Document d) {
-        KBEntity e = new KBEntity();
-        e.setId(d.getString(ID));
+        KBEntity e = new KBEntity(d.getString(ID));
         e.setName(d.getString(KB_NAME));
         e.setCleansedName(d.getString(CANONICAL_NAME));
         ArrayList<String> aliases = (ArrayList<String>) d.get(ALIASES);

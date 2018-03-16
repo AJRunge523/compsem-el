@@ -14,10 +14,11 @@ import java.util.Optional;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.arunge.el.api.EntityQuery;
-import com.arunge.el.api.TextEntity;
 import com.arunge.el.api.EntityKBStore;
+import com.arunge.el.api.EntityQuery;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.api.NLPDocument;
+import com.arunge.el.api.TextEntity;
 import com.arunge.unmei.iterators.CloseableIterator;
 import com.arunge.unmei.iterators.CloseableIterators;
 import com.arunge.unmei.iterators.Iterators;
@@ -78,6 +79,31 @@ public class MongoEntityStore implements EntityKBStore {
     }    
     
     @Override
+    public String insert(NLPDocument doc) {
+        Document d = nlpDocs.find(eq("_id", doc.getId())).first();
+        if(d != null) {
+            return doc.getId();
+        }
+        Document mongoDoc = MongoNLPDocumentConverter.toMongoDocument(doc);
+        nlpDocs.insertOne(mongoDoc);
+        return doc.getId();
+    }
+    
+    @Override
+    public Optional<NLPDocument> fetchNLPDocument(String id) {
+        Document d = nlpDocs.find(eq("_id", id)).first();
+        if(d == null) {
+            return Optional.empty();
+        }
+        return Optional.of(MongoNLPDocumentConverter.toNLPDocument(d));
+    }
+    
+    @Override
+    public CloseableIterator<NLPDocument> allNLPDocuments() {
+        return CloseableIterators.wrap(Iterators.map(nlpDocs.find().noCursorTimeout(true).iterator(), MongoNLPDocumentConverter::toNLPDocument));
+    }    
+    
+    @Override
     public String insert(KBEntity entity) {
         Document d = entities.find(eq("_id", entity.getId())).first();
         if(d != null) {
@@ -87,7 +113,8 @@ public class MongoEntityStore implements EntityKBStore {
         entities.insertOne(mongoDoc);
         return entity.getId();
     }
-
+    
+    
     @Override
     public Optional<KBEntity> fetchEntity(String id) {
         Document d = entities.find(eq("_id", id)).first();
@@ -129,6 +156,10 @@ public class MongoEntityStore implements EntityKBStore {
     @Override
     public void clearEntities() { 
         entities.drop();
+        this.entities.createIndex(Indexes.descending(CANONICAL_NAME));
+        this.entities.createIndex(Indexes.descending(KB_NAME));
+        this.entities.createIndex(Indexes.descending(NAME_BIGRAMS));
+        this.entities.createIndex(Indexes.descending(NAME_UNIGRAMS));
     }
     
 }

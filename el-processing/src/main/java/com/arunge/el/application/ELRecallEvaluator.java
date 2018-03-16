@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -12,9 +11,11 @@ import java.util.stream.Collectors;
 import com.arunge.el.api.ELQuery;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
-import com.arunge.el.processing.ELQueryTransformer;
+import com.arunge.el.api.NLPDocument;
+import com.arunge.el.api.TextEntity;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
-import com.arunge.el.processing.SimpleELQueryTransformer;
+import com.arunge.el.processing.KBDocumentTextProcessor;
+import com.arunge.el.processing.KBEntityConverter;
 import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.mongodb.MongoClient;
@@ -24,9 +25,9 @@ public class ELRecallEvaluator {
     public static void main(String[] args) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses.txt")))) {
             EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
+            KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
+            KBEntityConverter entityConverter = new KBEntityConverter();
             EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
-            List<ELQueryTransformer> transformers = new ArrayList<>();
-            transformers.add(new SimpleELQueryTransformer());
 
             int numGoldFound = 0;
             int totalQueries = 0;
@@ -35,11 +36,9 @@ public class ELRecallEvaluator {
             int totalCandidates = 0;
             Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
             for (ELQuery query : queries) {
-                KBEntity queryEntity = new KBEntity();
-
-                for (ELQueryTransformer transformer : transformers) {
-                    transformer.transform(queryEntity, query);
-                }
+                TextEntity textEntity = query.convertToEntity();
+                NLPDocument nlp = textProcessor.process(textEntity);
+                KBEntity queryEntity = entityConverter.convert(textEntity, nlp);
 
                 String goldId = queryEntity.getMeta("gold").get();
                 if (goldId.equals("NIL")) {

@@ -57,7 +57,7 @@ public class TACParser extends DefaultHandler {
         } else if(qName.equals("name")) {
             currentQuery.setName(currentVal);
         } else if(qName.equals("docid")) {
-            currentQuery.setDocPath(Paths.get(sourceDir, currentVal).toString());
+            currentQuery.setDocPath(Paths.get(sourceDir, currentVal + ".xml").toString());
         } else if(qName.equals("entity")) {
             currentQuery.setGoldEntity(currentVal);
         }

@@ -18,4 +18,8 @@ public class StringAttribute implements Attribute {
     public String getValueAsStr() {
         return value;
     }
+    
+    public static StringAttribute valueOf(String value) {
+        return new StringAttribute(value);
+    }
 }

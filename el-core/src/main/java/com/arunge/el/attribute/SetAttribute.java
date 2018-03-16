@@ -11,12 +11,8 @@ public class SetAttribute implements Attribute {
 
     private Set<String> values;
     
-    public SetAttribute(Collection<String> values) {
-        this.values = new HashSet<>(values);
-    }
-    
-    public SetAttribute(String[] values) {
-        this.values = Arrays.stream(values).collect(Collectors.toSet());
+    public SetAttribute(Set<String> values) {
+        this.values = values;
     }
     
     public Set<String> getSetValue() {
@@ -29,6 +25,14 @@ public class SetAttribute implements Attribute {
             return str.get();
         }
         return "";
+    }
+    
+    public static SetAttribute valueOf(Collection<String> values) {
+        return new SetAttribute(new HashSet<>(values));
+    }
+    
+    public static SetAttribute valueOf(String[] values) {
+        return new SetAttribute(Arrays.stream(values).collect(Collectors.toSet()));
     }
     
 }

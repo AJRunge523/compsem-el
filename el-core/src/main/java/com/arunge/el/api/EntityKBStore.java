@@ -32,20 +32,20 @@ public interface EntityKBStore {
      * @param document
      * @return
      */
-//    String insert(TextEntity document);
+    String insert(NLPDocument document);
     
     /**
      * Retrieves the document with the provided ID from the store if it exists.
      * @param docId
      * @return
      */
-//    Optional<TextEntity> fetchKBText(String docId);
+    Optional<NLPDocument> fetchNLPDocument(String docId);
     
     /**
      * Returns an iterator over all documents in the store.
      * @return
      */
-//    CloseableIterator<TextEntity> allKBText();
+    CloseableIterator<NLPDocument> allNLPDocuments();
     
     /**
      * Retrieves the entity with the provided ID from the store if it exists.

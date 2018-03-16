@@ -43,7 +43,9 @@ public class EntityCandidateRetrievalEngine {
         if(queryEntity.getNameUnigrams().isPresent()) {
             queryBuilder = queryBuilder.withNameUnigrams(queryEntity.getNameUnigrams().get());
         }
-        return Iterators.toStream(store.query(queryBuilder.build()));
+        EntityQuery query = queryBuilder.build();
+        
+        return Iterators.toStream(store.query(query));
     }
     
 }

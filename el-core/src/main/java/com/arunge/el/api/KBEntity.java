@@ -20,14 +20,6 @@ import com.arunge.el.attribute.StringAttribute;
  */
 public class KBEntity {
 
-    public enum EntityAttribute {
-        NAME,
-        CLEANSED_NAME,
-        ALIASES,
-        UNIGRAMS,
-        BIGRAMS
-    }
-    
     private String id;
     
     private EntityType type;
@@ -36,7 +28,8 @@ public class KBEntity {
     
     private Map<String, String> metadata;
     
-    public KBEntity() {
+    public KBEntity(String id) {
+        this.id = id;
         this.attributes = new HashMap<>();
         this.metadata = new HashMap<>();
     }
@@ -48,9 +41,21 @@ public class KBEntity {
     public void setId(String id) {
         this.id = id;
     }
+    
+    public EntityType getType() {
+        return type;
+    }
+
+    public void setType(EntityType type) {
+        this.type = type;
+    }
 
     public Attribute getAttribute(EntityAttribute attr){ 
         return attributes.get(attr);
+    }
+    
+    public void setAttribute(EntityAttribute key, Attribute val) {
+        this.attributes.put(key, val);
     }
     
     public String getName() {
@@ -80,19 +85,11 @@ public class KBEntity {
     }
 
     public void setAliases(String[] aliases) {
-        this.attributes.put(EntityAttribute.ALIASES, new SetAttribute(aliases));
+        this.attributes.put(EntityAttribute.ALIASES, SetAttribute.valueOf(aliases));
     }
     
     public void setAliases(Collection<String> aliases) {
-        this.attributes.put(EntityAttribute.ALIASES, new SetAttribute(aliases));
-    }
-
-    public EntityType getType() {
-        return type;
-    }
-
-    public void setType(EntityType type) {
-        this.type = type;
+        this.attributes.put(EntityAttribute.ALIASES, SetAttribute.valueOf(aliases));
     }
 
     public Optional<Set<String>> getNameUnigrams() {
@@ -104,11 +101,11 @@ public class KBEntity {
     }
 
     public void setNameUnigrams(Collection<String> nameUnigrams) {
-        this.attributes.put(EntityAttribute.UNIGRAMS, new SetAttribute(nameUnigrams));
+        this.attributes.put(EntityAttribute.UNIGRAMS, SetAttribute.valueOf(nameUnigrams));
     }
 
     public void setNameUnigrams(String[] nameUnigrams)  {
-        this.attributes.put(EntityAttribute.UNIGRAMS, new SetAttribute(nameUnigrams));
+        this.attributes.put(EntityAttribute.UNIGRAMS, SetAttribute.valueOf(nameUnigrams));
     }
     
     public Optional<Set<String>> getNameBigrams() {
@@ -120,11 +117,11 @@ public class KBEntity {
     }
 
     public void setNameBigrams(Collection<String> nameBigrams) {
-        this.attributes.put(EntityAttribute.BIGRAMS, new SetAttribute(nameBigrams));
+        this.attributes.put(EntityAttribute.BIGRAMS, SetAttribute.valueOf(nameBigrams));
     }
     
     public void setNameBigrams(String[] nameBigrams)  {
-        this.attributes.put(EntityAttribute.BIGRAMS, new SetAttribute(nameBigrams));
+        this.attributes.put(EntityAttribute.BIGRAMS, SetAttribute.valueOf(nameBigrams));
     }
     
     public void addMeta(String key, String value) {

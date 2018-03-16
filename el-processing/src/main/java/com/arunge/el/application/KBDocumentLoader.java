@@ -22,7 +22,7 @@ public class KBDocumentLoader {
     
     public static void main(String[] args) throws Exception{
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore store = new MongoEntityStore(client, "test_store");
+        MongoEntityStore store = new MongoEntityStore(client, "entity_store");
         Stream<Path> files = Files.list(Paths.get(dataDir));
         files.forEach(f -> {
             try {

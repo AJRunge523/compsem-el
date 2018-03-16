@@ -1,6 +1,7 @@
 package com.arunge.el.api;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -39,7 +40,7 @@ public class TextEntity {
     }
 
     public String getEntityType() {
-        return getSingleMetadata(EntityMetadataKeys.ENTITY_TYPE);
+        return getSingleMetadata(EntityMetadataKeys.ENTITY_TYPE).get();
     }
 
     public void setEntityType(String entityType) {
@@ -48,7 +49,7 @@ public class TextEntity {
     }
 
     public String getName() {
-        return getSingleMetadata(EntityMetadataKeys.NAME);
+        return getSingleMetadata(EntityMetadataKeys.NAME).get();
     }
 
     public void setName(String name) {
@@ -68,8 +69,13 @@ public class TextEntity {
         return meta.get(key);
     }
     
-    public String getSingleMetadata(String key) {
-        return meta.get(key).iterator().next();
+    public Optional<String> getSingleMetadata(String key) {
+        Collection<String> values = meta.get(key);
+        if(values == null || values.size() == 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(values.iterator().next());
+        }
     }
     
     public void clearMetadata(String key) {

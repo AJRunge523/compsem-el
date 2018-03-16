@@ -1,6 +1,7 @@
 package com.arunge.el.api;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharSource;
@@ -18,7 +19,7 @@ public class ELQuery {
     public ELQuery() { }
     
     public ELQuery(String queryId, String name, String docPath, String goldEntity) {
-        this.setQueryId(queryId);
+        this.queryId = queryId;
         this.name = name;
         this.docPath = docPath;
         this.goldEntity = goldEntity;
@@ -63,6 +64,16 @@ public class ELQuery {
         this.goldEntity = goldEntity;
     }
     
-    
+    public TextEntity convertToEntity() {
+        try {
+            TextEntity te = new TextEntity(queryId);
+            te.setName(name);
+            te.setDocText(getDocContent().read());
+            te.putMetadata("gold", goldEntity);
+            return te;
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading document content from file.", e);
+        }
+    }
     
 }

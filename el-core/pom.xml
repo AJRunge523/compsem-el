@@ -16,6 +16,10 @@
         <artifactId>unmei-iterators</artifactId>
     </dependency>
     <dependency>
+        <groupId>com.arunge</groupId>
+        <artifactId>unmei-nlp</artifactId>
+    </dependency>
+    <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
     </dependency>

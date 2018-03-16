@@ -8,8 +8,12 @@ import java.util.stream.Stream;
 import com.arunge.el.api.ELQuery;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.api.NLPDocument;
+import com.arunge.el.api.TextEntity;
 import com.arunge.el.processing.ELQueryTransformer;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
+import com.arunge.el.processing.KBDocumentTextProcessor;
+import com.arunge.el.processing.KBEntityConverter;
 import com.arunge.el.processing.SimpleELQueryTransformer;
 import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
@@ -27,9 +31,9 @@ public class EntityLinkingPipeline {
 
     public static void main(String[] args) {
         EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
+        KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
+        KBEntityConverter entityConverter = new KBEntityConverter();
         EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
-        List<ELQueryTransformer> transformers = new ArrayList<>();
-        transformers.add(new SimpleELQueryTransformer());
         
         int numCorrect = 0;
         int numNonNilCorrect = 0;
@@ -39,15 +43,11 @@ public class EntityLinkingPipeline {
         int total = 0;
         Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
         for(ELQuery query : queries) {
+
+            TextEntity textEntity = query.convertToEntity();
+            NLPDocument nlp = textProcessor.process(textEntity);
+            KBEntity queryEntity = entityConverter.convert(textEntity, nlp);
             
-//            System.out.println(query.getQueryId() + " " + query.getName());
-            KBEntity queryEntity = new KBEntity();
-
-            for(ELQueryTransformer transformer : transformers) { 
-                transformer.transform(queryEntity, query);
-            }
-            System.out.println(queryEntity.getName());
-
             Stream<KBEntity> entities = candidateRetrieval.retrieveCandidates(queryEntity);
             
             Optional<ScoredEntity> best = entities.map(e -> scoreEntity(queryEntity, e)).sorted().findFirst();
@@ -75,6 +75,8 @@ public class EntityLinkingPipeline {
         
         
     }
+    
+    
     
     private static ScoredEntity scoreEntity(KBEntity query, KBEntity kbEntry) {
         int score = Sets.intersection(query.getNameUnigrams().get(), kbEntry.getNameUnigrams().get()).size();

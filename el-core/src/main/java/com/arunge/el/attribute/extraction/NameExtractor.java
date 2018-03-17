@@ -13,6 +13,11 @@ import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
 import com.arunge.el.attribute.SetAttribute;
 import com.arunge.el.attribute.StringAttribute;
+import com.arunge.nlp.api.TokenFilters;
+import com.arunge.nlp.api.TokenFilters.TokenFilter;
+import com.arunge.nlp.api.Tokenizer;
+import com.arunge.nlp.stanford.FilteredTokenizer;
+import com.arunge.nlp.stanford.Tokenizers;
 
 /**
  * 
@@ -23,6 +28,16 @@ import com.arunge.el.attribute.StringAttribute;
  */
 public class NameExtractor implements AttributeExtractor {
 
+    private Tokenizer tokenizer;
+    
+    public NameExtractor() {
+        List<TokenFilter> filters = new ArrayList<>();
+        filters.add(TokenFilters.stopwords());
+        filters.add(TokenFilters.punctuation());
+        filters.add(TokenFilters.maxLength(50));
+        this.tokenizer = new FilteredTokenizer(Tokenizers.getDefault(), filters);
+    }
+    
     @Override
     public Map<EntityAttribute, Attribute> extract(TextEntity text, NLPDocument nlp) {
         Map<EntityAttribute, Attribute> attributes = new HashMap<>();
@@ -54,7 +69,10 @@ public class NameExtractor implements AttributeExtractor {
         Set<String> bigrams = new HashSet<>();
         for(String n : names) {
             n = n.toLowerCase();
-            String[] words = n.split("\\s+");
+            String[] words = tokenizer.tokenize(n).map(t -> t.text()).toArray(String[]::new);
+            if(words.length == 0) { 
+                continue;
+            }
             unigrams.add(words[0]);
             for(int i = 1; i < words.length; i++) {
                 unigrams.add(words[i]);

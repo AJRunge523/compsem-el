@@ -58,6 +58,10 @@ public class EntityTypeConverter {
         gpeTypes.add("country or territory");
         gpeTypes.add("province or territory of canada");
         gpeTypes.add("german bundesland");
+        gpeTypes.add("country");
+        gpeTypes.add("prc province");
+        gpeTypes.add("palestinian authority muni");
+        gpeTypes.add("israel municipality");
         orgTypes = new HashSet<>();
         orgTypes.add("_company");
         orgTypes.add("company");

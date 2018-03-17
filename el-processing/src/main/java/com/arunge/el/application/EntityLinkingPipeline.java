@@ -1,7 +1,5 @@
 package com.arunge.el.application;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -10,11 +8,9 @@ import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
-import com.arunge.el.processing.ELQueryTransformer;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
 import com.arunge.el.processing.KBDocumentTextProcessor;
 import com.arunge.el.processing.KBEntityConverter;
-import com.arunge.el.processing.SimpleELQueryTransformer;
 import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.google.common.collect.Sets;

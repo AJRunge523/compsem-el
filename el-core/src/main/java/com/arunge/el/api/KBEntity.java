@@ -50,6 +50,10 @@ public class KBEntity {
         this.type = type;
     }
 
+    public boolean hasAttribute(EntityAttribute attr) {
+        return attributes.containsKey(attr);
+    }
+    
     public Attribute getAttribute(EntityAttribute attr){ 
         return attributes.get(attr);
     }

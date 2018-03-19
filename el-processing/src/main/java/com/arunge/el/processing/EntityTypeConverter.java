@@ -46,6 +46,15 @@ public class EntityTypeConverter {
         personTypes.add("poker player");
         personTypes.add("ambassador");
         personTypes.add("mayor");
+        personTypes.add("chess player");
+        personTypes.add("nflactive");
+        personTypes.add("senator");
+        personTypes.add("character");
+        personTypes.add("_congressman");
+        personTypes.add("_actor");
+        personTypes.add("_vice president");
+        personTypes.add("radio presenter");
+        personTypes.add("chef");
         
         gpeTypes = new HashSet<>();
         gpeTypes.add("ort in deutschland");
@@ -62,6 +71,10 @@ public class EntityTypeConverter {
         gpeTypes.add("prc province");
         gpeTypes.add("palestinian authority muni");
         gpeTypes.add("israel municipality");
+        gpeTypes.add("england county");
+        gpeTypes.add("autonomous region of china (prc)");
+        gpeTypes.add("uk place");
+        
         orgTypes = new HashSet<>();
         orgTypes.add("_company");
         orgTypes.add("company");
@@ -75,6 +88,22 @@ public class EntityTypeConverter {
         orgTypes.add("american political party");
         orgTypes.add("newspaper");
         orgTypes.add("geopolitical organization");
+        orgTypes.add("co-operative");
+        orgTypes.add("organization");
+        orgTypes.add("militant organization");
+        orgTypes.add("law enforcement agency");
+        orgTypes.add("american_political_party");
+        orgTypes.add("_organization");
+        orgTypes.add("football club");
+        orgTypes.add("prc political parties");
+        orgTypes.add("airport");
+        orgTypes.add("exchange");
+        orgTypes.add("firedepartment");
+        orgTypes.add("_airline");
+        orgTypes.add("un");
+        orgTypes.add("radio station");
+        orgTypes.add("central bank");
+        
         
         personArtists = new HashSet<>();
         personArtists.add("solo_singer");
@@ -114,7 +143,6 @@ public class EntityTypeConverter {
                         } else if (orgArtists.contains("group_or_band")){
                             return EntityType.ORG;
                         } else {
-                            System.out.println(background.get());
                             throw new RuntimeException("abcdefg");
                         }
                     }

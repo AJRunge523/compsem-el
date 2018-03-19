@@ -62,7 +62,7 @@ public class NameExtractor implements AttributeExtractor {
      */
     private HashMap<EntityAttribute, Attribute> getNameNgrams(String name, String cleansedName, Set<String> aliases) {
         List<String> names = new ArrayList<>();
-        names.add(name);
+//        names.add(name);
         names.add(cleansedName);
         names.addAll(aliases);
         Set<String> unigrams = new HashSet<>();

@@ -11,9 +11,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.arunge.el.api.ELQuery;
 import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
+import com.arunge.el.api.EntityMetadataKeys;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
@@ -31,6 +35,8 @@ import com.mongodb.MongoClient;
 
 public class TrainEntityLinker {
 
+    private static Logger LOG = LoggerFactory.getLogger(TrainEntityLinker.class);
+    
     public static void main(String[] args) throws IOException {
         EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
         KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
@@ -75,9 +81,12 @@ public class TrainEntityLinker {
             if(!goldIncluded) { 
                 Optional<KBEntity> gold = entityStore.fetchEntity(goldId);
                 if(!gold.isPresent()) {
-                    throw new RuntimeException("Missing gold entity with id " + goldId + " in KB.");
+                    TextEntity missing = entityStore.fetchKBText(goldId).get();
+                    LOG.info("Missing gold entity {} with id {}, infobox type is {}", missing.getName(), goldId, missing.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE));
+//                    throw new RuntimeException("Missing gold entity with id " + goldId + " in KB.");
+                } else {
+                    entities.add(gold.get());
                 }
-                entities.add(gold.get());
             }
             
             List<String> instanceStrings = entities.stream().map(candidate -> {

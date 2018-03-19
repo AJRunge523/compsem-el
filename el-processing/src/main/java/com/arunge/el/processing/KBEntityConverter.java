@@ -1,7 +1,6 @@
 package com.arunge.el.processing;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -12,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
-import com.arunge.el.api.EntityMetadataKeys;
-import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
@@ -36,12 +33,12 @@ public class KBEntityConverter {
     private static Logger LOG = LoggerFactory.getLogger(KBEntityConverter.class);
     
     private int processed = 0;
-    private Map<String, Integer> unkCounts;
+//    private Map<String, Integer> unkCounts;
     
     private List<AttributeExtractor> attrExtractors;
     
     public KBEntityConverter() {
-        this.unkCounts = new HashMap<>();
+//        this.unkCounts = new HashMap<>();
         this.attrExtractors = new ArrayList<>();
         this.attrExtractors.add(new NameExtractor());
     }
@@ -52,8 +49,7 @@ public class KBEntityConverter {
      */
     public void process(EntityKBStore entityStore) {
         Stream<Pair<TextEntity, NLPDocument>> kbIter = Streams.zip(Iterators.toStream(entityStore.allKBText()), Iterators.toStream(entityStore.allNLPDocuments()), (a, b) -> Pair.of(a, b));
-        kbIter.filter(pair -> testEntityType(pair.getLeft(), pair.getRight()))
-              .map(pair -> convert(pair.getLeft(), pair.getRight()))
+        kbIter.map(pair -> convert(pair.getLeft(), pair.getRight()))
               .forEach(e -> {
                   processed += 1;
                   entityStore.insert(e);
@@ -62,9 +58,9 @@ public class KBEntityConverter {
                   }
               });
         
-        for(String key : unkCounts.keySet()) {
-            System.out.println(key + "\t" + unkCounts.get(key));
-        }
+//        for(String key : unkCounts.keySet()) {
+//            System.out.println(key + "\t" + unkCounts.get(key));
+//        }
     }
     
     /**
@@ -88,14 +84,14 @@ public class KBEntityConverter {
         return entity;
     }
     
-    private boolean testEntityType(TextEntity text, NLPDocument nlp) {
-        String infoboxType = text.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE).get();
-        EntityType type = EntityTypeConverter.convert(text);
-        if(type.equals(EntityType.UNK)) {
-            unkCounts.compute(infoboxType, (k, v) -> (v == null) ? 1 : v+1);
-            return false;
-        }
-        return true;
-    }
+//    private boolean testEntityType(TextEntity text, NLPDocument nlp) {
+//        String infoboxType = text.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE).get();
+//        EntityType type = EntityTypeConverter.convert(text);
+//        if(type.equals(EntityType.UNK)) {
+//            unkCounts.compute(infoboxType, (k, v) -> (v == null) ? 1 : v+1);
+//            return false;
+//        }
+//        return true;
+//    }
     
 }

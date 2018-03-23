@@ -7,6 +7,7 @@ import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
 import static com.arunge.el.store.mongo.MongoEntityFields.TYPE;
+import static com.arunge.el.store.mongo.MongoEntityFields.ACRONYM;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ public class MongoEntityConverter {
         document.append(TYPE, e.getType().name().charAt(0));
         document.append(NAME_UNIGRAMS, e.getNameUnigrams().orElse(new HashSet<>()));
         document.append(NAME_BIGRAMS, e.getNameBigrams().orElse(new HashSet<>()));
+        document.append(ACRONYM, e.getAcronym().orElse(""));
         return document;
     }
     
@@ -49,6 +51,7 @@ public class MongoEntityConverter {
         }
         ArrayList<String> unigrams = (ArrayList<String>) d.get(NAME_UNIGRAMS);
         ArrayList<String> bigrams = (ArrayList<String>) d.get(NAME_UNIGRAMS);
+        e.setAcronym(d.getString(ACRONYM));
         e.setNameUnigrams(new HashSet<>(unigrams));
         e.setNameBigrams(new HashSet<>(bigrams));
         return e;

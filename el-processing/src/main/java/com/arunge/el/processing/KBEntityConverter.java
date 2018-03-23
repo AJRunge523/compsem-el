@@ -15,6 +15,7 @@ import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.extraction.AcronymExtractor;
 import com.arunge.el.attribute.extraction.AttributeExtractor;
 import com.arunge.el.attribute.extraction.NameExtractor;
 import com.arunge.unmei.iterators.Iterators;
@@ -33,14 +34,13 @@ public class KBEntityConverter {
     private static Logger LOG = LoggerFactory.getLogger(KBEntityConverter.class);
     
     private int processed = 0;
-//    private Map<String, Integer> unkCounts;
     
     private List<AttributeExtractor> attrExtractors;
     
     public KBEntityConverter() {
-//        this.unkCounts = new HashMap<>();
         this.attrExtractors = new ArrayList<>();
         this.attrExtractors.add(new NameExtractor());
+        this.attrExtractors.add(new AcronymExtractor());
     }
     
     /**
@@ -58,9 +58,6 @@ public class KBEntityConverter {
                   }
               });
         
-//        for(String key : unkCounts.keySet()) {
-//            System.out.println(key + "\t" + unkCounts.get(key));
-//        }
     }
     
     /**
@@ -83,15 +80,5 @@ public class KBEntityConverter {
         }
         return entity;
     }
-    
-//    private boolean testEntityType(TextEntity text, NLPDocument nlp) {
-//        String infoboxType = text.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE).get();
-//        EntityType type = EntityTypeConverter.convert(text);
-//        if(type.equals(EntityType.UNK)) {
-//            unkCounts.compute(infoboxType, (k, v) -> (v == null) ? 1 : v+1);
-//            return false;
-//        }
-//        return true;
-//    }
     
 }

@@ -18,6 +18,7 @@ public class EntityInstanceConverter {
     public EntityInstanceConverter(List<EntityFeatureExtractor> extractors) {
         this.extractors = extractors;
         this.indexer = new FeatureIndexer();
+        this.indexer.getOrAdd(FeatureDescriptor.of("***dummy***"));
         for(EntityFeatureExtractor extractor : extractors) { 
             for(FeatureDescriptor desc : extractor.featureNames()) {
                 this.indexer.getOrAdd(desc);

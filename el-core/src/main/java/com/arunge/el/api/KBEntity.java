@@ -128,6 +128,18 @@ public class KBEntity {
         this.attributes.put(EntityAttribute.BIGRAMS, SetAttribute.valueOf(nameBigrams));
     }
     
+    public Optional<String> getAcronym() {
+        Attribute val = attributes.get(EntityAttribute.ACRONYM);
+        if(val == null) {
+            return Optional.empty();
+        }
+        return Optional.of(val.getValueAsStr());
+    }
+    
+    public void setAcronym(String acronym) {
+        this.attributes.put(EntityAttribute.ACRONYM, StringAttribute.valueOf(acronym));
+    }
+    
     public void addMeta(String key, String value) {
         this.metadata.put(key, value);
     }

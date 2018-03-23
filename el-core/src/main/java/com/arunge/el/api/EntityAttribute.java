@@ -5,5 +5,6 @@ public enum EntityAttribute {
     CLEANSED_NAME,
     ALIASES,
     UNIGRAMS,
-    BIGRAMS
+    BIGRAMS,
+    ACRONYM
 }

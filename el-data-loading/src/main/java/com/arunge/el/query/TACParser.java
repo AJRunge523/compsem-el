@@ -20,7 +20,7 @@ public class TACParser extends DefaultHandler {
     private List<ELQuery> currentQueries;
     private SAXParser parser;
     private ELQuery currentQuery;
-    private String currentVal;
+    private String currentVal = "";
     private String sourceDir;
     
     public TACParser() { 

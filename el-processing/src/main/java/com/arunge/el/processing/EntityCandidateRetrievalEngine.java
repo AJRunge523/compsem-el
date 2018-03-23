@@ -40,9 +40,14 @@ public class EntityCandidateRetrievalEngine {
             names.addAll(aliases.get());
         }
         queryBuilder = queryBuilder.withNameVariants(names);
-        if(queryEntity.getNameUnigrams().isPresent()) {
-            queryBuilder = queryBuilder.withNameUnigrams(queryEntity.getNameUnigrams().get());
+        if(queryEntity.getAcronym().isPresent()) {
+            List<String> acronyms = new ArrayList<>();
+            acronyms.add(queryEntity.getAcronym().get());
+            queryBuilder = queryBuilder.withAcronyms(acronyms);
         }
+//        if(queryEntity.getNameUnigrams().isPresent()) {
+//            queryBuilder = queryBuilder.withNameUnigrams(queryEntity.getNameUnigrams().get());
+//        }
         EntityQuery query = queryBuilder.build();
         
         return Iterators.toStream(store.query(query));

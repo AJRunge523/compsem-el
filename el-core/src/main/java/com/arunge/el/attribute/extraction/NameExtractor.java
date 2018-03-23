@@ -13,6 +13,7 @@ import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
 import com.arunge.el.attribute.SetAttribute;
 import com.arunge.el.attribute.StringAttribute;
+import com.arunge.nlp.api.Token;
 import com.arunge.nlp.api.TokenFilters;
 import com.arunge.nlp.api.TokenFilters.TokenFilter;
 import com.arunge.nlp.api.Tokenizer;
@@ -51,6 +52,7 @@ public class NameExtractor implements AttributeExtractor {
 
     private String cleanCanonicalName(String name) {
         String clean = name.replaceAll("\\(.*\\)", "");
+        clean = clean.replaceAll("-", " ");
         clean = clean.replaceAll("\\p{Punct}", "");
         clean = clean.toLowerCase();
         return clean;
@@ -62,7 +64,6 @@ public class NameExtractor implements AttributeExtractor {
      */
     private HashMap<EntityAttribute, Attribute> getNameNgrams(String name, String cleansedName, Set<String> aliases) {
         List<String> names = new ArrayList<>();
-//        names.add(name);
         names.add(cleansedName);
         names.addAll(aliases);
         Set<String> unigrams = new HashSet<>();

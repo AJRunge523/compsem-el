@@ -2,10 +2,12 @@ package com.arunge.el.store.mongo;
 
 import static com.arunge.el.store.mongo.MongoEntityFields.CANONICAL_NAME;
 import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
+import static com.arunge.el.store.mongo.MongoEntityFields.ACRONYM;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.or;
+import static com.mongodb.client.model.Filters.and;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.Optional;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.EntityQuery;
@@ -36,7 +40,7 @@ import com.mongodb.client.model.Indexes;
  */
 public class MongoEntityStore implements EntityKBStore {
 
-    
+    private static Logger LOG = LoggerFactory.getLogger(MongoEntityStore.class);
     MongoCollection<Document> docs;
     MongoCollection<Document> nlpDocs;
     MongoCollection<Document> entities;
@@ -50,6 +54,7 @@ public class MongoEntityStore implements EntityKBStore {
         this.entities.createIndex(Indexes.descending(KB_NAME));
         this.entities.createIndex(Indexes.descending(NAME_BIGRAMS));
         this.entities.createIndex(Indexes.descending(NAME_UNIGRAMS));
+        this.entities.createIndex(Indexes.descending(ACRONYM));
 
     }
     
@@ -131,23 +136,24 @@ public class MongoEntityStore implements EntityKBStore {
     
     @Override
     public CloseableIterator<KBEntity> query(EntityQuery query) {
-        List<Bson> nameFilters = new ArrayList<>();
-        for(String name : query.getNameVariants()) {
-            nameFilters.add(eq(CANONICAL_NAME, name));
-        }
-        List<Bson> tokenFilters = new ArrayList<>();
-        for(String token : query.getNameUnigrams()) {
-            tokenFilters.add(eq(NAME_UNIGRAMS, token));
-        }
+        
         List<Bson> filters = new ArrayList<>();
-        if(tokenFilters.size() > 0) {
-            filters.add(or(tokenFilters));
+        for(String name : query.getNameVariants()) {
+            filters.add(eq(CANONICAL_NAME, name));
+            String[] words = name.split("\\s+");
+            List<Bson> wordFilters = new ArrayList<>();
+            for(String word : words) {
+                wordFilters.add(eq(NAME_UNIGRAMS, word));
+            }
+            filters.add(and(wordFilters));
         }
-        if(nameFilters.size() > 0) {
-            filters.add(or(nameFilters));
+        
+        for(String acronym : query.getAcronyms()) {
+            filters.add(eq(ACRONYM, acronym));
         }
+        
         if(filters.size() > 0) { 
-            Bson mongoQuery = or(or(nameFilters), or(tokenFilters));
+            Bson mongoQuery = or(filters);
             return CloseableIterators.wrap(Iterators.map(entities.find(mongoQuery).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
         }
         return CloseableIterators.wrap(new ArrayList<KBEntity>(0).iterator());

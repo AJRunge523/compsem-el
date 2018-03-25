@@ -2,17 +2,19 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.arunge.el</groupId>
   <artifactId>compsem-el</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>com.arunge</groupId>
     <artifactId>arunge-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
   </parent>
   <modules>
     <module>el-core</module>
   	<module>el-data-loading</module>
   	<module>el-mongo-entity-store</module>
   	<module>el-processing</module>
+  	<module>el-nlp</module>
   </modules>
   <dependencyManagement>
     <dependencies>
@@ -39,12 +41,12 @@
         <dependency>
             <groupId>com.arunge</groupId>
             <artifactId>unmei-iterators</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.arunge</groupId>
             <artifactId>unmei-nlp</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
   </dependencyManagement>

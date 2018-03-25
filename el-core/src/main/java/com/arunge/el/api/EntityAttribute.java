@@ -6,5 +6,8 @@ public enum EntityAttribute {
     ALIASES,
     UNIGRAMS,
     BIGRAMS,
-    ACRONYM
+    ACRONYM,
+    METAPHONE,
+    CONTEXT_VECTOR,
+    TOPIC_VECTOR,
 }

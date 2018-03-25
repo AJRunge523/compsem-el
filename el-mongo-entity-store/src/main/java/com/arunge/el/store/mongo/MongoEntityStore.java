@@ -1,17 +1,19 @@
 package com.arunge.el.store.mongo;
 
+import static com.arunge.el.store.mongo.MongoEntityFields.ACRONYM;
 import static com.arunge.el.store.mongo.MongoEntityFields.CANONICAL_NAME;
 import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
-import static com.arunge.el.store.mongo.MongoEntityFields.ACRONYM;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
 import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.or;
-import static com.mongodb.client.model.Filters.and;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -109,6 +111,29 @@ public class MongoEntityStore implements EntityKBStore {
     }    
     
     @Override
+    public void updateNLPDocument(String id, String field, Object value) {
+        Document update = new Document();
+        if(value instanceof Map) {
+            Document valueDoc = new Document();
+            Map<?, ?> valueMap = (Map<?, ?>) value;
+            for(Object key : valueMap.keySet()) {
+                valueDoc.append(key.toString(), valueMap.get(key));
+            }
+            update.append(field, valueDoc);
+        } else if(value instanceof String) {
+            update.append(field, value);
+        } else if(value instanceof Set) {
+            update.append(field, value);
+        }
+        nlpDocs.updateOne(eq("_id", id), new Document("$set", update));
+    }
+
+    @Override
+    public void clearNLPDocument(String field) {
+        nlpDocs.updateMany(new Document(), new Document("$unset", new Document(field, "")));
+    }
+    
+    @Override
     public String insert(KBEntity entity) {
         Document d = entities.find(eq("_id", entity.getId())).first();
         if(d != null) {
@@ -167,5 +192,7 @@ public class MongoEntityStore implements EntityKBStore {
         this.entities.createIndex(Indexes.descending(NAME_BIGRAMS));
         this.entities.createIndex(Indexes.descending(NAME_UNIGRAMS));
     }
+
+
     
 }

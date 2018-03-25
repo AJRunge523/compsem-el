@@ -35,6 +35,19 @@ public interface EntityKBStore {
     String insert(NLPDocument document);
     
     /**
+     * Updates the NLPDocument with the specified id with the provided key-value pair.
+     * @param field
+     * @param value
+     */
+    void updateNLPDocument(String id, String field, Object value);
+    
+    /**
+     * Clears the specified field from all NLP documents in the store.
+     * @param field
+     */
+    void clearNLPDocument(String field);
+    
+    /**
      * Retrieves the document with the provided ID from the store if it exists.
      * @param docId
      * @return

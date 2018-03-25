@@ -14,13 +14,25 @@ import com.arunge.nlp.api.FeatureExtractor;
 
 public abstract class EntityFeatureExtractor implements FeatureExtractor<Pair<KBEntity, KBEntity>> {
 
-    protected EntityAttribute key;
+    protected EntityAttribute queryAttribute;
+    protected EntityAttribute candidateAttribute;
+    
     /**
      * Initializes a feature extractor that operates on a particular entity attribute.
      * @param attribute
      */
-    public EntityFeatureExtractor(EntityAttribute attribute) {
-        this.key = attribute;
+    public EntityFeatureExtractor(EntityAttribute queryAndCandidateAttribute) {
+        this.queryAttribute = queryAndCandidateAttribute;
+        this.candidateAttribute = queryAndCandidateAttribute;
+    }
+    
+    /**
+     * Initializes a feature extractor that operates on a particular entity attribute.
+     * @param attribute
+     */
+    public EntityFeatureExtractor(EntityAttribute queryAttribute, EntityAttribute candidateAttribute) {
+        this.queryAttribute = queryAttribute;
+        this.candidateAttribute = candidateAttribute;
     }
 
     public Map<FeatureDescriptor, Double> extractFeatures(Pair<KBEntity, KBEntity> entityPair) {
@@ -28,11 +40,12 @@ public abstract class EntityFeatureExtractor implements FeatureExtractor<Pair<KB
     }
     
     public Map<FeatureDescriptor, Double> extractFeatures(KBEntity query, KBEntity candidate) {
-        if(!query.hasAttribute(key) || !candidate.hasAttribute(key)) {
+        
+        if(!query.hasAttribute(queryAttribute) || !candidate.hasAttribute(candidateAttribute)) {
             return new HashMap<>();
         } 
         else {
-            return extract(query.getAttribute(key), candidate.getAttribute(key));
+            return extract(query.getAttribute(queryAttribute), candidate.getAttribute(candidateAttribute));
         }
     }
     

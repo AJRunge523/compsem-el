@@ -10,5 +10,7 @@ public class MongoEntityFields {
     public static String NAME_UNIGRAMS = "nu";
     public static String NAME_BIGRAMS = "nb";
     public static String ACRONYM = "acr";
+    public static String CONTEXT = "cxt";
+    public static String GOLD_LABEL = "gold";
     
 }

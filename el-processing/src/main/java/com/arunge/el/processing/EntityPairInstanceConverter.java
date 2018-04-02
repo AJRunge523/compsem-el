@@ -9,13 +9,13 @@ import com.arunge.el.feature.EntityFeatureExtractor;
 import com.arunge.nlp.api.FeatureDescriptor;
 import com.arunge.nlp.api.FeatureIndexer;
 
-public class EntityInstanceConverter {
+public class EntityPairInstanceConverter {
 
     private List<EntityFeatureExtractor> extractors;
     
     private FeatureIndexer indexer;
     
-    public EntityInstanceConverter(List<EntityFeatureExtractor> extractors) {
+    public EntityPairInstanceConverter(List<EntityFeatureExtractor> extractors) {
         this.extractors = extractors;
         this.indexer = new FeatureIndexer();
         this.indexer.getOrAdd(FeatureDescriptor.of("***dummy***"));

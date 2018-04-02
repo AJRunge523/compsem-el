@@ -29,12 +29,16 @@ public class CosineSimilarity extends EntityFeatureExtractor {
         Map<FeatureDescriptor, Double> features = new HashMap<>();
         Map<Integer, Double> first = ((SparseVectorAttribute) query).getValue();
         Map<Integer, Double> second = ((SparseVectorAttribute) candidate).getValue();
+        
         double cosine = computeCosine(first, second);
         features.put(featureName, cosine);
         return features;
     }
 
     private static double computeCosine(Map<Integer, Double> v1, Map<Integer, Double> v2) {
+        if(v1.isEmpty() || v2.isEmpty()) {
+            return 0.0;
+        }
         double firstNorm = 0.0;
         double secondNorm = 0.0;
         double dot = 0.0;

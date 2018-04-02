@@ -26,6 +26,7 @@
        <dependency>
           <groupId>com.arunge</groupId>
           <artifactId>unmei-ml</artifactId>
+          <version>0.0.2-SNAPSHOT</version>
       </dependency>
   </dependencies>
   

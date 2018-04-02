@@ -6,7 +6,7 @@ import com.mongodb.MongoClient;
 
 public class KBEntityConversion {
 
-    private static String entityStoreDB = "entity_store";
+    private static String entityStoreDB = "el_training_query_store";
     
     public static void main(String[] args) {
         MongoClient client = new MongoClient("localhost", 27017);

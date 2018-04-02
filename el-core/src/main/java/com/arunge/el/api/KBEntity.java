@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.arunge.el.attribute.Attribute;
 import com.arunge.el.attribute.SetAttribute;
+import com.arunge.el.attribute.SparseVectorAttribute;
 import com.arunge.el.attribute.StringAttribute;
 
 /**
@@ -146,6 +147,18 @@ public class KBEntity {
     
     public Optional<String> getMeta(String key) {
         return Optional.ofNullable(this.metadata.get(key));
+    }
+    
+    public Optional<Map<Integer, Double>> getContext() {
+        SparseVectorAttribute attr = (SparseVectorAttribute) attributes.get(EntityAttribute.CONTEXT_VECTOR);
+        if(attr == null) {
+            return Optional.empty();
+        }
+        return Optional.of(attr.getValue());
+    }
+    
+    public void setContext(Map<Integer, Double> context) {
+        this.attributes.put(EntityAttribute.CONTEXT_VECTOR, new SparseVectorAttribute(context));
     }
     
 }

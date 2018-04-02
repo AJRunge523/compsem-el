@@ -10,21 +10,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.arunge.el.api.ELQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
-import com.arunge.el.api.NLPDocument;
-import com.arunge.el.api.TextEntity;
 import com.arunge.el.feature.EntityFeatureExtractor;
+import com.arunge.el.feature.JaroWinkler;
+import com.arunge.el.feature.LevenshteinEditDistance;
+import com.arunge.el.feature.LongestCommonSubstringDistance;
 import com.arunge.el.feature.StringMatchFeatureExtractor;
 import com.arunge.el.feature.StringOverlapFeatureExtractor;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
-import com.arunge.el.processing.EntityInstanceConverter;
-import com.arunge.el.processing.KBDocumentTextProcessor;
-import com.arunge.el.processing.KBEntityConverter;
-import com.arunge.el.query.QuerySetLoader;
+import com.arunge.el.processing.EntityPairInstanceConverter;
 import com.arunge.el.store.mongo.MongoEntityStore;
+import com.arunge.unmei.iterators.CloseableIterator;
 import com.arunge.unmei.ml.svm.SVMRank;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -39,39 +40,41 @@ import com.mongodb.MongoClient;
  */
 public class EntityLinkingEvaluation {
 
+    private static Logger LOG = LoggerFactory.getLogger(EntityLinkingEvaluation.class);
+    
     public static void main(String[] args) throws IOException {
-        EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
-        KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
-        KBEntityConverter entityConverter = new KBEntityConverter();
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
+        MongoClient client = new MongoClient("localhost", 27017);
+        EntityKBStore kbStore = new MongoEntityStore(client, "entity_store");
+        EntityKBStore queryStore = new MongoEntityStore(client, "el_training_query_store"); 
+        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
         
         List<EntityFeatureExtractor> extractors = new ArrayList<>();
         extractors.add(new StringMatchFeatureExtractor(EntityAttribute.NAME));
         extractors.add(new StringMatchFeatureExtractor(EntityAttribute.CLEANSED_NAME));
         extractors.add(new StringOverlapFeatureExtractor(EntityAttribute.NAME));
         extractors.add(new StringOverlapFeatureExtractor(EntityAttribute.CLEANSED_NAME));
-        EntityInstanceConverter instanceConverter = new EntityInstanceConverter(extractors);
+        extractors.add(new LevenshteinEditDistance(EntityAttribute.CLEANSED_NAME));
+        extractors.add(new JaroWinkler(EntityAttribute.CLEANSED_NAME));
+        extractors.add(new LongestCommonSubstringDistance(EntityAttribute.NAME));
+        extractors.add(new LongestCommonSubstringDistance(EntityAttribute.CLEANSED_NAME));
+        EntityPairInstanceConverter instanceConverter = new EntityPairInstanceConverter(extractors);
         
         SVMRank candidateRanker = new SVMRank(Paths.get("J:\\Program Files\\SVMRank"));
         
-        Path goldFile = Paths.get("src/test/resources/train-gold.txt");
+        Path goldFile = Paths.get("src/main/resources/train-gold.txt");
         
         Path modelFile = Paths.get("output/test/model.model");
         Path evalFile = Paths.get("output/test/query.eval");
         Path queryEvalFile = Paths.get("output/test/query-out.eval");
         Path outputFile = Paths.get("output/test/el-evaluation.txt");
         BufferedWriter evalWriter = new BufferedWriter(new FileWriter(outputFile.toFile()));
-        Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
+        CloseableIterator<KBEntity> trainingQueries = queryStore.allEntities();
         int numQueries = 0;
-        for(ELQuery query : queries) {
+        while(trainingQueries.hasNext()) {
+            KBEntity queryEntity = trainingQueries.next();
             numQueries += 1;
             BufferedWriter trainWriter = new BufferedWriter(new FileWriter(evalFile.toFile()));
             int queryId = numQueries;
-            
-            //Process the query through the NLP and information extraction pipelines.
-            TextEntity textEntity = query.convertToEntity();
-            NLPDocument nlp = textProcessor.process(textEntity);
-            KBEntity queryEntity = entityConverter.convert(textEntity, nlp);
             
             //Retrieve the candidates
             List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity).collect(Collectors.toList());
@@ -106,7 +109,10 @@ public class EntityLinkingEvaluation {
             if(maxScore > 0) {
                 bestId = bestCandidate.getId();
             }
-            evalWriter.write(query.getQueryId() + "\t" + bestId + "\n");
+            evalWriter.write(queryEntity.getId() + "\t" + bestId + "\n");
+            if(numQueries % 100 == 0) {
+                LOG.info("Evaluated {} queries.", numQueries);
+            }
             
         }
         evalWriter.close();

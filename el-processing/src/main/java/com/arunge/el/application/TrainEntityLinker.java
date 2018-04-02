@@ -15,22 +15,22 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.arunge.el.api.ELQuery;
 import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.EntityMetadataKeys;
 import com.arunge.el.api.KBEntity;
-import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
+import com.arunge.el.feature.CosineSimilarity;
 import com.arunge.el.feature.EntityFeatureExtractor;
+import com.arunge.el.feature.JaroWinkler;
+import com.arunge.el.feature.LevenshteinEditDistance;
+import com.arunge.el.feature.LongestCommonSubstringDistance;
 import com.arunge.el.feature.StringMatchFeatureExtractor;
 import com.arunge.el.feature.StringOverlapFeatureExtractor;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
-import com.arunge.el.processing.EntityInstanceConverter;
-import com.arunge.el.processing.KBDocumentTextProcessor;
-import com.arunge.el.processing.KBEntityConverter;
-import com.arunge.el.query.QuerySetLoader;
+import com.arunge.el.processing.EntityPairInstanceConverter;
 import com.arunge.el.store.mongo.MongoEntityStore;
+import com.arunge.unmei.iterators.CloseableIterator;
 import com.arunge.unmei.ml.svm.SVMRank;
 import com.mongodb.MongoClient;
 
@@ -39,16 +39,21 @@ public class TrainEntityLinker {
     private static Logger LOG = LoggerFactory.getLogger(TrainEntityLinker.class);
     
     public static void main(String[] args) throws IOException {
-        EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
-        KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
-        KBEntityConverter entityConverter = new KBEntityConverter();
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
+        MongoClient client = new MongoClient("localhost", 27017);
+        EntityKBStore kbStore = new MongoEntityStore(client, "entity_store");
+        EntityKBStore queryStore = new MongoEntityStore(client, "el_training_query_store");
+        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
         List<EntityFeatureExtractor> extractors = new ArrayList<>();
         extractors.add(new StringMatchFeatureExtractor(EntityAttribute.NAME));
         extractors.add(new StringMatchFeatureExtractor(EntityAttribute.CLEANSED_NAME));
         extractors.add(new StringOverlapFeatureExtractor(EntityAttribute.NAME));
         extractors.add(new StringOverlapFeatureExtractor(EntityAttribute.CLEANSED_NAME));
-        EntityInstanceConverter instanceConverter = new EntityInstanceConverter(extractors);
+        extractors.add(new LevenshteinEditDistance(EntityAttribute.CLEANSED_NAME));
+        extractors.add(new JaroWinkler(EntityAttribute.CLEANSED_NAME));
+        extractors.add(new LongestCommonSubstringDistance(EntityAttribute.NAME));
+        extractors.add(new LongestCommonSubstringDistance(EntityAttribute.CLEANSED_NAME));
+        extractors.add(new CosineSimilarity(EntityAttribute.CONTEXT_VECTOR));
+        EntityPairInstanceConverter instanceConverter = new EntityPairInstanceConverter(extractors);
         
         Path trainFile = Paths.get("output/test/train.dat");
         Path modelFile = Paths.get("output/test/model.model");
@@ -56,21 +61,18 @@ public class TrainEntityLinker {
         
         BufferedWriter trainWriter = new BufferedWriter(new FileWriter(trainFile.toFile()));
         
-        Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
+        CloseableIterator<KBEntity> trainingQueries = queryStore.allEntities();
+        
         int numQueries = 1;
-        for(ELQuery query : queries) {
-            System.out.println("Query Name: " + query.getName());
+        int trainInstances = 0 ;
+        while(trainingQueries.hasNext()) {
             int queryId = numQueries;
-            if(numQueries % 100 == 0) {
-                System.out.println("Loaded " + numQueries + " queries.");
-            }
-            TextEntity textEntity = query.convertToEntity();
-            String goldId = textEntity.getSingleMetadata("gold").get();
-            if(textEntity.getSingleMetadata("gold").get().equals("NIL")) {
+            KBEntity queryEntity = trainingQueries.next();
+            System.out.println("Query Name: " + queryEntity.getName() + " " + numQueries);
+            String goldId = queryEntity.getAttribute(EntityAttribute.GOLD_LABEL).getValueAsStr();
+            if(goldId.equals("NIL")) {
                 continue;
             }
-            NLPDocument nlp = textProcessor.process(textEntity);
-            KBEntity queryEntity = entityConverter.convert(textEntity, nlp);
             
             List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity).collect(Collectors.toList());
             LOG.info("Retrieved {} candidates", candidates.size());
@@ -83,9 +85,9 @@ public class TrainEntityLinker {
                 }
             }
             if(!goldIncluded) { 
-                Optional<KBEntity> gold = entityStore.fetchEntity(goldId);
+                Optional<KBEntity> gold = kbStore.fetchEntity(goldId);
                 if(!gold.isPresent()) {
-                    TextEntity missing = entityStore.fetchKBText(goldId).get();
+                    TextEntity missing = kbStore.fetchKBText(goldId).get();
                     LOG.info("Missing gold entity {} with id {}, infobox type is {}", missing.getName(), goldId, missing.getSingleMetadata(EntityMetadataKeys.INFOBOX_TYPE));
 //                    throw new RuntimeException("Missing gold entity with id " + goldId + " in KB.");
                 } else {
@@ -102,13 +104,14 @@ public class TrainEntityLinker {
                 String instanceStr = SVMRank.instanceToString(queryId, rank, instance);
                 return instanceStr;
             }).collect(Collectors.toList());
+            trainInstances += instanceStrings.size();
             Collections.sort(instanceStrings, Collections.reverseOrder());
             for(String inst : instanceStrings) {
                 trainWriter.write(inst + "\n");
             }
             numQueries += 1;
         }
-        
+        LOG.info("Finished collecting training instances. Total training instances: {}", trainInstances);
         trainWriter.close();
         
         SVMRank rank = new SVMRank(Paths.get("J:\\Program Files\\SVMRank"));

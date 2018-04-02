@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.arunge.el.api.ContextType;
 import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
@@ -17,6 +18,8 @@ import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
 import com.arunge.el.attribute.extraction.AcronymExtractor;
 import com.arunge.el.attribute.extraction.AttributeExtractor;
+import com.arunge.el.attribute.extraction.DistributionalContextExtractor;
+import com.arunge.el.attribute.extraction.GoldLabelExtractor;
 import com.arunge.el.attribute.extraction.NameExtractor;
 import com.arunge.unmei.iterators.Iterators;
 import com.google.common.collect.Streams;
@@ -41,6 +44,8 @@ public class KBEntityConverter {
         this.attrExtractors = new ArrayList<>();
         this.attrExtractors.add(new NameExtractor());
         this.attrExtractors.add(new AcronymExtractor());
+        this.attrExtractors.add(new DistributionalContextExtractor(ContextType.NORM_TFIDF));
+        this.attrExtractors.add(new GoldLabelExtractor());
     }
     
     /**

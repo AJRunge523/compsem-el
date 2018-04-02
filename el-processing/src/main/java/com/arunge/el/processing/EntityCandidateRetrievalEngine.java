@@ -40,7 +40,7 @@ public class EntityCandidateRetrievalEngine {
             names.addAll(aliases.get());
         }
         queryBuilder = queryBuilder.withNameVariants(names);
-        if(queryEntity.getAcronym().isPresent()) {
+        if(queryEntity.getAcronym().isPresent() && !queryEntity.getAcronym().get().trim().isEmpty()) {
             List<String> acronyms = new ArrayList<>();
             acronyms.add(queryEntity.getAcronym().get());
             queryBuilder = queryBuilder.withAcronyms(acronyms);

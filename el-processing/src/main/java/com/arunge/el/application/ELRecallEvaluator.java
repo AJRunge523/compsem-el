@@ -8,39 +8,39 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.arunge.el.api.ELQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
-import com.arunge.el.api.NLPDocument;
-import com.arunge.el.api.TextEntity;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
-import com.arunge.el.processing.KBDocumentTextProcessor;
-import com.arunge.el.processing.KBEntityConverter;
-import com.arunge.el.query.QuerySetLoader;
 import com.arunge.el.store.mongo.MongoEntityStore;
+import com.arunge.unmei.iterators.CloseableIterator;
 import com.mongodb.MongoClient;
 
 public class ELRecallEvaluator {
 
+    private static Logger LOG = LoggerFactory.getLogger(ELRecallEvaluator.class);
+    
     public static void main(String[] args) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses.txt")))) {
-            EntityKBStore entityStore = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
-            KBDocumentTextProcessor textProcessor = new KBDocumentTextProcessor();
-            KBEntityConverter entityConverter = new KBEntityConverter();
-            EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(entityStore);
+            MongoClient client = new MongoClient("localhost", 27017);
+            EntityKBStore kbStore = new MongoEntityStore(client, "entity_store");
+            EntityKBStore queryStore = new MongoEntityStore(client, "el_training_query_store");
+            EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
 
             int numGoldFound = 0;
             int totalQueries = 0;
             int minCandidates = Integer.MAX_VALUE;
             int maxCandidates = Integer.MIN_VALUE;
             int totalCandidates = 0;
-            Iterable<ELQuery> queries = QuerySetLoader.loadTAC2010Train();
-            for (ELQuery query : queries) {
-                TextEntity textEntity = query.convertToEntity();
-                NLPDocument nlp = textProcessor.process(textEntity);
-                KBEntity queryEntity = entityConverter.convert(textEntity, nlp);
+            CloseableIterator<KBEntity> trainingQueries = queryStore.allEntities();
+            
+            while(trainingQueries.hasNext()) {
+                KBEntity queryEntity = trainingQueries.next();
 
-                String goldId = queryEntity.getMeta("gold").get();
+                String goldId = queryEntity.getAttribute(EntityAttribute.GOLD_LABEL).getValueAsStr();
                 if (goldId.equals("NIL")) {
                     continue;
                 }
@@ -54,11 +54,12 @@ public class ELRecallEvaluator {
                     maxCandidates = numCandidates;
                 }
                 totalCandidates += numCandidates;
+                LOG.info("Retrieved {} candidates for query {} with name {}", numCandidates, queryEntity.getId(), queryEntity.getName());
                 Optional<KBEntity> matchEntity = candidates.stream().filter(e -> e.getId().equals(goldId)).findFirst();
                 if (matchEntity.isPresent()) {
                     numGoldFound += 1;
                 } else {
-                    writer.write(query.getQueryId() + "\t" + query.getName() + "\t" + goldId + "\n");
+                    writer.write(queryEntity.getId() + "\t" + queryEntity.getName() + "\t" + goldId + "\n");
                 }
                 totalQueries += 1;
 

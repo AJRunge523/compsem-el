@@ -10,4 +10,5 @@ public enum EntityAttribute {
     METAPHONE,
     CONTEXT_VECTOR,
     TOPIC_VECTOR,
+    GOLD_LABEL
 }

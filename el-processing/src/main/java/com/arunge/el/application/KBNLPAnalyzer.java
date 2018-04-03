@@ -16,7 +16,7 @@ public class KBNLPAnalyzer {
     
     public static void main(String[] args) throws Exception {
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore es = new MongoEntityStore(client, "entity_store");
+        MongoEntityStore es = new MongoEntityStore(client, "el_eval_query_store");
         KBDocumentTextProcessor processor = new KBDocumentTextProcessor();
         try(CloseableIterator<TextEntity> textDocs = es.allKBText()) { 
             int numProcessed = 0;

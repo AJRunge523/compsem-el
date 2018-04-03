@@ -15,6 +15,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -28,6 +29,7 @@ public class QueryDocParser {
     XPath xPath = XPathFactory.newInstance().newXPath();
     
     XPathExpression textPath;
+    XPathExpression backupText;
     
     public static void main(String[] args) throws Exception { 
         QueryDocParser parser = new QueryDocParser();
@@ -50,13 +52,22 @@ public class QueryDocParser {
         factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         builder = factory.newDocumentBuilder();
         textPath = xPath.compile("DOC/BODY/TEXT/POST"); 
+        backupText = xPath.compile("DOC/BODY/TEXT");
     }
  
     public String getDocText(String xmlText) throws SAXException, IOException, XPathExpressionException { 
+        StringBuilder sb = new StringBuilder();
         ByteArrayInputStream input = new ByteArrayInputStream(xmlText.getBytes("UTF-8"));
         Document doc = builder.parse(input);
         NodeList nl = (NodeList) textPath.evaluate(doc, XPathConstants.NODESET);
-        return nl.item(0).getTextContent();
+        if(nl.getLength() == 0) { 
+            nl = (NodeList) backupText.evaluate(doc, XPathConstants.NODESET);
+        }
+        for(int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            sb.append(n.getTextContent());
+        }
+        return sb.toString();
     }
     
 }

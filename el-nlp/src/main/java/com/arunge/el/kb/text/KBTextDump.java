@@ -13,8 +13,8 @@ import com.mongodb.MongoClient;
 public class KBTextDump {
 
     public static void main(String[] args) throws IOException {
-        String outDir = "J:\\Education\\CMU\\2018\\Spring\\Computational Semantics\\Entity Linking\\text-kb";
-        MongoEntityStore store = new MongoEntityStore(new MongoClient("localhost", 27017), "entity_store");
+        String outDir = "J:\\entity-linking-data\\eval-queries";
+        MongoEntityStore store = new MongoEntityStore(new MongoClient("localhost", 27017), "el_eval_query_store");
         CloseableIterator<TextEntity> text = store.allKBText();
         while(text.hasNext()) {
             TextEntity te = text.next();

@@ -21,6 +21,8 @@ public class ELQueryToDBLoader {
         for(ELQuery query : queries) {
             TextEntity textEntity = query.convertToEntity();
             String docText = parser.getDocText(textEntity.getDocText());
+//            System.out.println(query.getDocPath());
+//            System.out.println(query.getQueryId());
             if(docText.isEmpty()) {
                 throw new RuntimeException("Error text was empty.");
             }

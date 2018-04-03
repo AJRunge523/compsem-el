@@ -1,5 +1,6 @@
 package com.arunge.el.store.mongo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +17,14 @@ public class MongoNLPDocumentConverter {
         return d;
     }
     
+    @SuppressWarnings("unchecked")
     public static NLPDocument toNLPDocument(Document doc) {
         String id = doc.getString("_id");
         NLPDocument d = new NLPDocument(id);
+        if(doc.containsKey(MongoNLPFields.WIKILINKS_ALIASES)) {
+            ArrayList<String> aliases = (ArrayList<String>) doc.get(MongoNLPFields.WIKILINKS_ALIASES);
+            d.setAliases(aliases);
+        }
         for(ContextType type : ContextType.values()) {
             if(doc.containsKey(type.name())) { 
                 Document dist = (Document) doc.get(type.name());

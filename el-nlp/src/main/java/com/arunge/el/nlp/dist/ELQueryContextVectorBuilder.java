@@ -17,7 +17,7 @@ public class ELQueryContextVectorBuilder {
 
     public static void main(String[] args) throws IOException {
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore store = new MongoEntityStore(client, "el_training_query_store");
+        MongoEntityStore store = new MongoEntityStore(client, "el_eval_query_store");
         CountingVocabulary vocabulary = CountingVocabulary.read(new File("output/kb-tfidf-length_norm-corpus.vocab"));
         Corpus corpus = CorpusBuilder.fixedTfIdfCorpusBuilder(vocabulary)
                 .addSource(new MongoKBDocTextSource(store))

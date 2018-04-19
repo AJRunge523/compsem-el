@@ -7,16 +7,16 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.attribute.StringAttribute;
-import com.arunge.nlp.api.TokenFilters;
-import com.arunge.nlp.api.TokenFilters.TokenFilter;
 import com.arunge.nlp.api.Tokenizer;
 import com.arunge.nlp.stanford.FilteredTokenizer;
 import com.arunge.nlp.stanford.Tokenizers;
+import com.arunge.nlp.tokenization.TokenFilters;
+import com.arunge.nlp.tokenization.TokenFilters.TokenFilter;
 
 public class AcronymExtractor implements AttributeExtractor {
 

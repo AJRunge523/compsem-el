@@ -1,5 +1,6 @@
 package com.arunge.el.attribute;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -29,6 +30,20 @@ public class SparseVectorAttribute implements Attribute {
             sb.append(e.getKey() + " : " + e.getValue() + ",");
         }
         return sb.append("]").toString();
+    }
+    
+    public static SparseVectorAttribute valueOf(Map<Integer, Double> vector) {
+        return new SparseVectorAttribute(vector);
+    }
+    
+    public static SparseVectorAttribute valueOf(double[] vector) {
+        Map<Integer, Double> sparseVec = new HashMap<>();
+        for(int i = 0; i < vector.length; i++) {
+            if(vector[i] != 0.0) {
+                sparseVec.put(i, vector[i]);
+            }
+        }
+        return new SparseVectorAttribute(sparseVec);
     }
     
 }

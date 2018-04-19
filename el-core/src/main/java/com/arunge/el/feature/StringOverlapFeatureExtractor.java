@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.nlp.api.FeatureDescriptor;
 import com.google.common.collect.Sets;
 

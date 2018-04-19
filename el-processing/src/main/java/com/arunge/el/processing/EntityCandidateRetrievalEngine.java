@@ -6,8 +6,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.arunge.el.api.EntityQuery;
 import com.arunge.el.api.EntityKBStore;
+import com.arunge.el.api.EntityQuery;
+import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
 import com.arunge.unmei.iterators.Iterators;
 
@@ -33,24 +34,51 @@ public class EntityCandidateRetrievalEngine {
     public Stream<KBEntity> retrieveCandidates(KBEntity queryEntity) {
         EntityQuery.Builder queryBuilder = EntityQuery.builder();
         List<String> names = new ArrayList<>();
+        List<String> cleansedNames = new ArrayList<>();
         names.add(queryEntity.getName());
-        names.add(queryEntity.getCleansedName());
+        cleansedNames.add(queryEntity.getCleansedName());
         Optional<Set<String>> aliases = queryEntity.getAliases();
         if(aliases.isPresent()) {
             names.addAll(aliases.get());
         }
-        queryBuilder = queryBuilder.withNameVariants(names);
+        if(queryEntity.getCleansedAliases().isPresent()) {
+            cleansedNames.addAll(queryEntity.getCleansedAliases().get());
+        }
+        queryBuilder = queryBuilder.withRawNames(names)
+                .withCleansedNames(cleansedNames);
         if(queryEntity.getAcronym().isPresent() && !queryEntity.getAcronym().get().trim().isEmpty()) {
             List<String> acronyms = new ArrayList<>();
             acronyms.add(queryEntity.getAcronym().get());
             queryBuilder = queryBuilder.withAcronyms(acronyms);
         }
-//        if(queryEntity.getNameUnigrams().isPresent()) {
-//            queryBuilder = queryBuilder.withNameUnigrams(queryEntity.getNameUnigrams().get());
-//        }
+        queryBuilder = queryBuilder.withType(queryEntity.getType());
         EntityQuery query = queryBuilder.build();
         
-        return Iterators.toStream(store.query(query));
+        return Iterators.toStream(store.query(query)).filter(e -> {
+            String queryAcr = queryEntity.getAcronym().orElse("").trim();
+            String entAcr = e.getAcronym().orElse("");
+            
+            //Filter Condition 1: Remove UNK and person type entities if the query is an acronym
+            if((e.getType() == EntityType.UNK || e.getType() == EntityType.PERSON) && !(e.getCleansedName().equals(queryEntity.getCleansedName()))) {
+                if(!queryAcr.isEmpty()) {
+                    if(queryAcr.equals(queryEntity.getName())) {
+                        return false;
+                    }
+                }
+            }
+            
+            //Filter condition 2: Remove single-word location results that don't start with the query term. Based on observations of how locations tend to be referenced
+            if(queryEntity.getType() == EntityType.GPE) {
+                if(queryEntity.getName().contains(" ") || e.getName().startsWith(queryEntity.getName()) || e.getCleansedName().startsWith(queryEntity.getCleansedName())
+                        || e.getAliases().get().contains(queryEntity.getName()) || e.getCleansedAliases().get().contains(queryEntity.getCleansedName())
+                        || (e.getAcronym().isPresent() && e.getAcronym().get().equals(queryEntity.getName()))) {
+                    return true;
+                } 
+                return false;
+            }
+            return true;
+            
+        });
     }
     
 }

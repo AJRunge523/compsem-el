@@ -8,18 +8,18 @@ import org.slf4j.LoggerFactory;
 import com.arunge.el.api.ContextType;
 import com.arunge.el.kb.text.MongoKBDocTextSource;
 import com.arunge.el.store.mongo.MongoEntityStore;
-import com.arunge.nlp.api.Corpus;
-import com.arunge.nlp.api.CorpusDocument;
+import com.arunge.nlp.corpus.Corpus;
+import com.arunge.nlp.corpus.CorpusBuilder;
+import com.arunge.nlp.corpus.CorpusDocument;
+import com.arunge.nlp.corpus.TFType;
 import com.arunge.nlp.stanford.Tokenizers;
-import com.arunge.nlp.vocab.CorpusBuilder;
-import com.arunge.nlp.vocab.TFType;
 import com.mongodb.MongoClient;
 
 public class KBCorpusConstructor {
 
     private static String CORPUS_TYPE = "TFIDF";
     
-    private static TFType tfType = TFType.LOG_LENGTH_NORM;
+    private static TFType tfType = TFType.LENGTH_NORM;
     
     private static Logger LOG = LoggerFactory.getLogger(KBCorpusConstructor.class);
     
@@ -71,7 +71,7 @@ public class KBCorpusConstructor {
         Corpus corpus = CorpusBuilder.tfIdfCorpusBuilder(type)
                 .addSource(new MongoKBDocTextSource(store))
                 .withTokenizer(Tokenizers.getDefaultFiltered())
-                .withMinVocabInclusion(5)
+                .withMinVocabInclusion(0, 5)
                 .build();
         
 //        CountingCorpus corpus = (CountingCorpus) CountingCorpus.loadCorpus(new File("output/kb-count-corpus.corpus"));
@@ -79,23 +79,23 @@ public class KBCorpusConstructor {
         LOG.info("Finished loading corpus, exporting vectors.");
         corpus.export("output/", String.format("kb-tfidf-%s-corpus", type.name().toLowerCase()));
         LOG.info("Finished exporting corpus, writing vectors to DB.");
-        int numProcessed = 0;
-        for(CorpusDocument doc : corpus) {
-            switch(type) {
-            case LENGTH_NORM:
-                store.updateNLPDocument(doc.getDocId(), ContextType.NORM_TFIDF.name(), doc.getVocab());
-                break;
-            case LOG_LENGTH_NORM:
-                store.updateNLPDocument(doc.getDocId(), ContextType.LOG_NORM_TFIDF.name(), doc.getVocab());
-                break;
-            default:
-                break;
-            }
-            numProcessed += 1;
-            if(numProcessed % 1000 == 0) { 
-                LOG.info("Processed {} documents.", numProcessed);
-            }
-        }
+//        int numProcessed = 0;
+//        for(CorpusDocument doc : corpus) {
+//            switch(type) {
+//            case LENGTH_NORM:
+//                store.updateNLPDocument(doc.getDocId(), ContextType.NORM_TFIDF.name(), doc.getVocab());
+//                break;
+//            case LOG_LENGTH_NORM:
+//                store.updateNLPDocument(doc.getDocId(), ContextType.LOG_NORM_TFIDF.name(), doc.getVocab());
+//                break;
+//            default:
+//                break;
+//            }
+//            numProcessed += 1;
+//            if(numProcessed % 1000 == 0) { 
+//                LOG.info("Processed {} documents.", numProcessed);
+//            }
+//        }
     }
     
 }

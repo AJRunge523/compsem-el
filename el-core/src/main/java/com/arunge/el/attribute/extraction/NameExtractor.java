@@ -6,23 +6,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.attribute.SetAttribute;
 import com.arunge.el.attribute.StringAttribute;
-import com.arunge.nlp.api.Token;
-import com.arunge.nlp.api.TokenFilters;
-import com.arunge.nlp.api.TokenFilters.TokenFilter;
 import com.arunge.nlp.api.Tokenizer;
 import com.arunge.nlp.stanford.FilteredTokenizer;
 import com.arunge.nlp.stanford.Tokenizers;
+import com.arunge.nlp.tokenization.TokenFilters;
+import com.arunge.nlp.tokenization.TokenFilters.TokenFilter;
 
 /**
  * 
- *<p>Extractor for features related to names and unigrams/bigrams of the names.<p>
+ *<p>Extractor for features related to names, aliases, and unigrams/bigrams of the names.<p>
  *
  * @author Andrew Runge
  *
@@ -46,6 +46,11 @@ public class NameExtractor implements AttributeExtractor {
         attributes.put(EntityAttribute.NAME, StringAttribute.valueOf(name));
         String cleansedName = cleanCanonicalName(text.getName());
         attributes.put(EntityAttribute.CLEANSED_NAME, StringAttribute.valueOf(cleansedName));
+        Set<String> aliases = nlp.getAliases();
+//        aliases.add(name);
+        attributes.put(EntityAttribute.ALIASES, SetAttribute.valueOf(aliases));
+        Set<String> cleansedAliases = aliases.stream().map(a -> cleanCanonicalName(a)).collect(Collectors.toSet());
+        attributes.put(EntityAttribute.CLEANSED_ALIASES, SetAttribute.valueOf(cleansedAliases));
         attributes.putAll(getNameNgrams(name, cleansedName, new HashSet<>()));
         return attributes;
     }
@@ -55,7 +60,8 @@ public class NameExtractor implements AttributeExtractor {
         clean = clean.replaceAll("-", " ");
         clean = clean.replaceAll("\\p{Punct}", "");
         clean = clean.toLowerCase();
-        return clean;
+        clean = tokenizer.tokenize(clean).map(t -> t.text()).reduce("", (a, b) -> a + " " + b);
+        return clean.trim();
     }
     
     /**

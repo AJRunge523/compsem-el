@@ -74,7 +74,7 @@ public class TextEntity {
         if(values == null || values.size() == 0) {
             return Optional.empty();
         } else {
-            return Optional.of(values.iterator().next());
+            return Optional.ofNullable(values.iterator().next());
         }
     }
     

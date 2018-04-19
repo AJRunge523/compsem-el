@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.arunge.unmei.iterators.CloseableIterator;
@@ -24,10 +24,10 @@ public class ELRecallEvaluator {
     private static Logger LOG = LoggerFactory.getLogger(ELRecallEvaluator.class);
     
     public static void main(String[] args) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses.txt")))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses-eval.txt")))) {
             MongoClient client = new MongoClient("localhost", 27017);
-            EntityKBStore kbStore = new MongoEntityStore(client, "entity_store");
-            EntityKBStore queryStore = new MongoEntityStore(client, "el_training_query_store");
+            EntityKBStore kbStore = MongoEntityStore.kbStore(client);
+            EntityKBStore queryStore = MongoEntityStore.evalStore(client);
             EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
 
             int numGoldFound = 0;

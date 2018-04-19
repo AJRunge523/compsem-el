@@ -5,14 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.arunge.ingest.TextSource;
 import com.arunge.nlp.api.FeatureDescriptor;
-import com.arunge.nlp.api.FeatureExtractor;
+import com.arunge.nlp.features.FeatureExtractor;
 import com.arunge.nlp.text.FeatureTextDocument;
 import com.arunge.nlp.text.TextDocument;
 import com.arunge.unmei.iterators.Iterators;

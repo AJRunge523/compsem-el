@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
+import com.arunge.el.attribute.SetAttribute;
 import com.arunge.el.attribute.StringAttribute;
 import com.arunge.nlp.api.FeatureDescriptor;
 import com.google.common.collect.Sets;
@@ -39,14 +40,56 @@ public class LevenshteinEditDistance extends EntityFeatureExtractor {
     @Override
     protected Map<FeatureDescriptor, Double> extract(Attribute query, Attribute candidate) {
         Map<FeatureDescriptor, Double> features = new HashMap<>();
-        StringAttribute first = (StringAttribute) query;
-        StringAttribute second = (StringAttribute) candidate;
-        double editDistance = (double) computeNormalizedEditDistance(first.getValueAsStr(), second.getValueAsStr());
+        double editDistance = 1.0;
+        if(query instanceof StringAttribute && candidate instanceof StringAttribute) { 
+            StringAttribute first = (StringAttribute) query;
+            StringAttribute second = (StringAttribute) candidate;
+            editDistance = computeNormalizedEditDistance(first.getValueAsStr(), second.getValueAsStr());
+        } else if(query instanceof SetAttribute && candidate instanceof StringAttribute) {
+            editDistance = computeStringDistance((StringAttribute) candidate, (SetAttribute) query);
+        } else if(query instanceof StringAttribute && candidate instanceof SetAttribute) {
+            editDistance = computeStringDistance((StringAttribute) query, (SetAttribute) candidate);
+        } else if(query instanceof SetAttribute && candidate instanceof SetAttribute) {
+            editDistance = computeStringDistance((SetAttribute) query, (SetAttribute) candidate);
+        }
+
         features.put(featureName, editDistance);
         return features;
     }
     
+    private double computeStringDistance(StringAttribute first, SetAttribute second) {
+        if(second.getSetValue() == null || second.getSetValue().isEmpty()) {
+            return 0.5;
+        }
+        double best = 1.0;
+        for(String s : second.getSetValue()) {
+            double distance = computeNormalizedEditDistance(first.getValueAsStr(), s);
+            if(distance < best) {
+                best = distance;
+            }
+        }
+        return best;
+    }
+    
+    private double computeStringDistance(SetAttribute first, SetAttribute second) {
+        double best = 1.0;
+        if(first.getSetValue() == null || first.getSetValue().isEmpty() || 
+                second.getSetValue() == null || second.getSetValue().isEmpty()) {
+            return 0.0;
+        }
+        for(String s : second.getSetValue()) {
+            double distance = computeNormalizedEditDistance(first.getValueAsStr(), s);
+            if(distance < best) {
+                best = distance;
+            }
+        }
+        return best;
+    }
+    
     private static double computeNormalizedEditDistance(String s1, String s2) {
+        if(s1.length() == 0 && s2.length() == 0) { 
+            return 0.0;
+        }
         double norm = s1.length() > s2.length() ? s1.length() : s2.length();
         int[] prevRow = new int[s1.length() + 1];
         int prevInCol = -1;
@@ -76,7 +119,7 @@ public class LevenshteinEditDistance extends EntityFeatureExtractor {
     }
     
     public static void main(String[] args) {
-        System.out.println(LevenshteinEditDistance.computeNormalizedEditDistance("bugs", "bags"));
+        System.out.println(LevenshteinEditDistance.computeNormalizedEditDistance("", ""));
     }
     
     

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.attribute.SetAttribute;
 import com.arunge.el.attribute.SparseVectorAttribute;
 import com.arunge.el.attribute.StringAttribute;
@@ -22,8 +23,6 @@ import com.arunge.el.attribute.StringAttribute;
 public class KBEntity {
 
     private String id;
-    
-    private EntityType type;
     
     private Map<EntityAttribute, Attribute> attributes;
     
@@ -44,11 +43,12 @@ public class KBEntity {
     }
     
     public EntityType getType() {
-        return type;
+        Attribute val = attributes.get(EntityAttribute.ENTITY_TYPE);
+        return EntityType.valueOf(val.getValueAsStr());
     }
 
     public void setType(EntityType type) {
-        this.type = type;
+        this.attributes.put(EntityAttribute.ENTITY_TYPE, StringAttribute.valueOf(type.name()));
     }
 
     public boolean hasAttribute(EntityAttribute attr) {
@@ -91,6 +91,18 @@ public class KBEntity {
 
     public void setAliases(String[] aliases) {
         this.attributes.put(EntityAttribute.ALIASES, SetAttribute.valueOf(aliases));
+    }
+
+    public Optional<Set<String>> getCleansedAliases() {
+        SetAttribute attr = (SetAttribute) attributes.get(EntityAttribute.CLEANSED_ALIASES);
+        if(attr == null) {
+            return Optional.empty();
+        }
+        return Optional.of(attr.getSetValue());
+    }
+
+    public void setCleansedAliases(String[] cleansedAliases) {
+        this.attributes.put(EntityAttribute.CLEANSED_ALIASES, SetAttribute.valueOf(cleansedAliases));
     }
     
     public void setAliases(Collection<String> aliases) {
@@ -159,6 +171,10 @@ public class KBEntity {
     
     public void setContext(Map<Integer, Double> context) {
         this.attributes.put(EntityAttribute.CONTEXT_VECTOR, new SparseVectorAttribute(context));
+    }
+    
+    public Map<EntityAttribute, Attribute> getAttributes() {
+        return attributes;
     }
     
 }

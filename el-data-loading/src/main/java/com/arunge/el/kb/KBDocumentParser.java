@@ -33,6 +33,7 @@ public class KBDocumentParser extends DefaultHandler {
     private boolean sLink;
     
     
+    @SuppressWarnings("unused")
     private static Logger LOG = LoggerFactory.getLogger(KBDocumentParser.class);
     
     public static void main(String[] args) throws Exception {

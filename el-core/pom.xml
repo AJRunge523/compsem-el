@@ -39,6 +39,14 @@
 	    <version>1.2</version>
 	</dependency>
 
+	<!-- https://mvnrepository.com/artifact/com.github.haifengl/smile-nlp -->
+	<dependency>
+	    <groupId>com.github.haifengl</groupId>
+	    <artifactId>smile-nlp</artifactId>
+	    <version>1.5.1</version>
+	</dependency>
+
+
   </dependencies>
   
 </project>

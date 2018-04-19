@@ -1,44 +1,47 @@
 package com.arunge.el.store.mongo;
 
-import static com.arunge.el.store.mongo.MongoEntityFields.ACRONYM;
-import static com.arunge.el.store.mongo.MongoEntityFields.ALIASES;
-import static com.arunge.el.store.mongo.MongoEntityFields.CANONICAL_NAME;
-import static com.arunge.el.store.mongo.MongoEntityFields.CONTEXT;
 import static com.arunge.el.store.mongo.MongoEntityFields.GOLD_LABEL;
 import static com.arunge.el.store.mongo.MongoEntityFields.ID;
 import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
-import static com.arunge.el.store.mongo.MongoEntityFields.NAME_BIGRAMS;
-import static com.arunge.el.store.mongo.MongoEntityFields.NAME_UNIGRAMS;
-import static com.arunge.el.store.mongo.MongoEntityFields.TYPE;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.bson.Document;
 
-import com.arunge.el.api.EntityAttribute;
-import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
+import com.arunge.el.attribute.EntityAttributeTypes;
+import com.arunge.el.attribute.SetAttribute;
+import com.arunge.el.attribute.SparseVectorAttribute;
 import com.arunge.el.attribute.StringAttribute;
+import com.google.common.collect.Sets;
 
 public class MongoEntityConverter {
 
     public static Document toMongoDocument(KBEntity e) {
         Document document = new Document();
         document.append(ID, e.getId());
-        document.append(KB_NAME, e.getName());
-        document.append(CANONICAL_NAME, e.getCleansedName());
-        document.append(ALIASES, e.getAliases().orElse(new HashSet<>()));
-        document.append(TYPE, e.getType().name().charAt(0));
-        document.append(NAME_UNIGRAMS, e.getNameUnigrams().orElse(new HashSet<>()));
-        document.append(NAME_BIGRAMS, e.getNameBigrams().orElse(new HashSet<>()));
-        document.append(ACRONYM, e.getAcronym().orElse(""));
-        document.append(CONTEXT, convertMap(e.getContext().orElse(new HashMap<>())));
-        if(e.getAttribute(EntityAttribute.GOLD_LABEL) != null){ 
-            document.append(GOLD_LABEL, e.getAttribute(EntityAttribute.GOLD_LABEL).getValueAsStr());
+        
+        for(EntityAttribute attr : e.getAttributes().keySet()) {
+            String field = MongoEntityFields.toField(attr);
+            if(field == null) { 
+                System.out.println(e.getId());
+                throw new RuntimeException("Unrecognized attribute: " + attr.name());
+            }
+            Attribute val = e.getAttribute(attr);
+            if(val instanceof StringAttribute) {
+                document.append(field, val.getValueAsStr());
+            } else if(val instanceof SetAttribute) {
+                SetAttribute setAttr = (SetAttribute) val;
+                document.append(field, setAttr.getSetValue());
+            } else if(val instanceof SparseVectorAttribute) {
+                SparseVectorAttribute sva = (SparseVectorAttribute) val;
+                document.append(field, convertMap(sva.getValue()));
+            }
         }
+        
         return document;
     }
     
@@ -58,36 +61,38 @@ public class MongoEntityConverter {
         return vector;
     }
     
-    @SuppressWarnings("unchecked")
     public static KBEntity toEntity(Document d) {
         KBEntity e = new KBEntity(d.getString(ID));
         e.setName(d.getString(KB_NAME));
-        e.setCleansedName(d.getString(CANONICAL_NAME));
-        ArrayList<String> aliases = (ArrayList<String>) d.get(ALIASES);
-        e.setAliases(aliases.stream().toArray(String[]::new));
-        String typeStart = d.getString(TYPE);
-        if(typeStart.equals("P")) {
-            e.setType(EntityType.PERSON);
-        } else if(typeStart.equals("G")) {
-            e.setType(EntityType.GPE);
-        } else if(typeStart.equals("O")) {
-            e.setType(EntityType.ORG);
+        for(String field : d.keySet()) {
+            EntityAttribute attr = MongoEntityFields.toEntityAttribute(field);
+            if(attr == null) {
+                continue;
+            }
+            Class<? extends Attribute> attrClass = EntityAttributeTypes.getAttrType(attr);
+            if(attrClass.equals(StringAttribute.class) || attrClass.equals(SetAttribute.class)) {
+                e.setAttribute(attr, EntityAttributeTypes.wrapValue(attr, d.get(field)).get());
+            } else if(attrClass.equals(SparseVectorAttribute.class)) {
+                Map<Integer, Double> vector = convertVector((Document) d.get(field));
+                e.setAttribute(attr, EntityAttributeTypes.wrapValue(attr, vector).get());
+            } 
+        }
+        if(e.getAliases().isPresent()) {
+            e.getAliases().get().add(e.getName());
         } else {
-            e.setType(EntityType.UNK);
+            e.setAliases(Sets.newHashSet(e.getName()));
         }
-        ArrayList<String> unigrams = (ArrayList<String>) d.get(NAME_UNIGRAMS);
-        ArrayList<String> bigrams = (ArrayList<String>) d.get(NAME_UNIGRAMS);
-        Document vecDoc = (Document) d.get(CONTEXT);
-        if(vecDoc != null) {
-            Map<Integer, Double> vector = convertVector(vecDoc);
-            e.setContext(vector);
+        if(e.getCleansedAliases().isPresent()) {
+            e.getCleansedAliases().get().add(e.getCleansedName());
+        } else {
+            e.setAliases(Sets.newHashSet(e.getCleansedName()));
         }
-        if(d.getString(GOLD_LABEL) != null) {
-            e.setAttribute(EntityAttribute.GOLD_LABEL, StringAttribute.valueOf(d.getString(GOLD_LABEL)));
+        if(!e.getCleansedAliases().get().contains(e.getCleansedName())) {
+            throw new RuntimeException("AAAAH");
         }
-        e.setAcronym(d.getString(ACRONYM));
-        e.setNameUnigrams(new HashSet<>(unigrams));
-        e.setNameBigrams(new HashSet<>(bigrams));
+        if(!e.getAliases().get().contains(e.getName())) {
+            throw new RuntimeException("AAAAH");
+        }
         return e;
     }
 }

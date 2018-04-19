@@ -1,4 +1,4 @@
-package com.arunge.el.nlp.wikilinks;
+package com.arunge.el.nlp.wiki;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

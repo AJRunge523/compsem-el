@@ -10,17 +10,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.arunge.el.api.ContextType;
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.EntityKBStore;
+import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.attribute.extraction.AcronymExtractor;
 import com.arunge.el.attribute.extraction.AttributeExtractor;
+import com.arunge.el.attribute.extraction.CorefEntityExtractor;
 import com.arunge.el.attribute.extraction.DistributionalContextExtractor;
 import com.arunge.el.attribute.extraction.GoldLabelExtractor;
 import com.arunge.el.attribute.extraction.NameExtractor;
+import com.arunge.el.attribute.extraction.TopicModelExtractor;
 import com.arunge.unmei.iterators.Iterators;
 import com.google.common.collect.Streams;
 
@@ -40,12 +43,17 @@ public class KBEntityConverter {
     
     private List<AttributeExtractor> attrExtractors;
     
-    public KBEntityConverter() {
+    private boolean useGoldNER;
+    
+    public KBEntityConverter(boolean useGoldNER) {
         this.attrExtractors = new ArrayList<>();
         this.attrExtractors.add(new NameExtractor());
         this.attrExtractors.add(new AcronymExtractor());
         this.attrExtractors.add(new DistributionalContextExtractor(ContextType.NORM_TFIDF));
+        this.attrExtractors.add(new TopicModelExtractor());
+        this.attrExtractors.add(new CorefEntityExtractor());
         this.attrExtractors.add(new GoldLabelExtractor());
+        this.useGoldNER = useGoldNER;
     }
     
     /**
@@ -73,10 +81,25 @@ public class KBEntityConverter {
      */
     public KBEntity convert(TextEntity text, NLPDocument nlp) {
         KBEntity entity = new KBEntity(text.getId());
-        entity.setType(EntityTypeConverter.convert(text));
+        EntityType eType = EntityTypeConverter.convert(text);
+        if(useGoldNER) { 
+            String goldNER = text.getSingleMetadata("goldNER").get();
+            if(goldNER.equals("PER")) {
+                eType = EntityType.PERSON;
+            } else {
+                eType = EntityType.valueOf(goldNER);
+            }
+        }
+        if(eType.equals(EntityType.UNK) && nlp.getEntityType() != null) {
+            eType = nlp.getEntityType();
+        }
+        entity.setType(eType);
         for(AttributeExtractor extractor : attrExtractors) {
             Map<EntityAttribute, Attribute> attributes = extractor.extract(text, nlp);
             for(EntityAttribute e : attributes.keySet()) {
+                if(e == null) {
+                    throw new RuntimeException("asdfljkaskldjfls");
+                }
                 entity.setAttribute(e, attributes.get(e));
             }
         }

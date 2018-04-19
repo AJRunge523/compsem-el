@@ -16,11 +16,13 @@ public class EntityTypeConverter {
     static Set<String> personArtists;
     static Set<String> orgArtists;
     
+    static Set<String> gpeProps;
+    static Set<String> personProps;
+    static Set<String> orgProps;
     
     static {
         personTypes = new HashSet<>();
         personTypes.add("writer");
-//        personTypes.add("musical artist");
         personTypes.add("cyclist");
         personTypes.add("nba player");
         personTypes.add("afl player");
@@ -74,6 +76,7 @@ public class EntityTypeConverter {
         gpeTypes.add("england county");
         gpeTypes.add("autonomous region of china (prc)");
         gpeTypes.add("uk place");
+        gpeTypes.add("city in afghanistan");
         
         orgTypes = new HashSet<>();
         orgTypes.add("_company");
@@ -103,6 +106,7 @@ public class EntityTypeConverter {
         orgTypes.add("un");
         orgTypes.add("radio station");
         orgTypes.add("central bank");
+        orgTypes.add("bus transit");
         
         
         personArtists = new HashSet<>();
@@ -111,6 +115,28 @@ public class EntityTypeConverter {
         personArtists.add("Malaysian_actres");
         orgArtists = new HashSet<>();
         orgArtists.add("group_or_band");
+        
+        personProps = new HashSet<>();
+        personProps.add("ib_dateofbirth");
+        personProps.add("ib_placeofbirth");
+        
+        orgProps = new HashSet<>();
+        orgProps.add("ib_members");
+        orgProps.add("ib_disbanded");
+        orgProps.add("ib_founded");
+        orgProps.add("ib_owner");
+        orgProps.add("ib_parentcompany");
+        orgProps.add("ib_headquarters");
+        
+        gpeProps = new HashSet<>();
+        gpeProps.add("ib_capital");
+        gpeProps.add("ib_population");
+        gpeProps.add("ib_populationasof");
+        gpeProps.add("ib_foundation");
+        gpeProps.add("ib_website");
+        gpeProps.add("ib_coords");
+        gpeProps.add("ib_coordinates");
+        gpeProps.add("ib_elevation");
     }
     
     
@@ -144,6 +170,22 @@ public class EntityTypeConverter {
                             return EntityType.ORG;
                         } else {
                             throw new RuntimeException("abcdefg");
+                        }
+                    }
+                } else {
+                    for(String ibProp : personProps) {
+                        if(text.getSingleMetadata(ibProp).isPresent()) {
+                            return EntityType.PERSON;
+                        }
+                    }
+                    for(String ibProp : gpeProps) {
+                        if(text.getSingleMetadata(ibProp).isPresent()) {
+                            return EntityType.GPE;
+                        }
+                    }
+                    for(String ibProp : orgProps) {
+                        if(text.getSingleMetadata(ibProp).isPresent()) {
+                            return EntityType.ORG;
                         }
                     }
                 }

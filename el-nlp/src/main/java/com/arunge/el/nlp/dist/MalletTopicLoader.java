@@ -14,14 +14,19 @@ import com.mongodb.MongoClient;
 public class MalletTopicLoader {
 
     public static void main(String[] args) throws IOException {
-        File topicFile = new File("J:/Education/CMU/2018/Spring/Computational Semantics/Entity Linking/Topic Models/train_200.txt");
-        int numTopics = 200;
+        File topicFile = new File("J:/Education/CMU/2018/Spring/Computational Semantics/Entity Linking/external_evals/Topic Models/eval_500.txt");
+//        File topicFile = new File("J:/Education/CMU/2018/Spring/Computational Semantics/Entity Linking/external_evals/Topic Models/text-kb_500_composition.txt");
+        int numTopics = 500;
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore store = new MongoEntityStore(client, "el_training_query_store");
+        MongoEntityStore store = MongoEntityStore.evalStore(client);
+        @SuppressWarnings("resource")
         BufferedReader reader = new BufferedReader(new FileReader(topicFile));
         String line = "";
         ContextType type = null;
         switch(numTopics) {
+        case 25:
+            type = ContextType.TOPIC_25;
+            break;
         case 50:
             type = ContextType.TOPIC_50;
             break;
@@ -60,12 +65,12 @@ public class MalletTopicLoader {
             double sum = 0.0;
             for (int i = 2; i < parts.length; i++) {
                 double topicWeight = Double.parseDouble(parts[i]);
-                if(topicWeight > 0.01) {
+                if(topicWeight > 0.001) {
                     sparseTopicVector.put(i-2, topicWeight);
                     sum += topicWeight;
                 }
             }
-            //Re-normalize
+//            Re-normalize
             for(Integer key : sparseTopicVector.keySet()) {
                 sparseTopicVector.put(key, sparseTopicVector.get(key) / sum);
             }

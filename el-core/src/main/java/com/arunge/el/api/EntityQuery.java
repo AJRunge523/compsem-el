@@ -6,7 +6,9 @@ import java.util.List;
 
 public class EntityQuery {
 
-    private List<String> nameVariants;
+    private List<String> rawNames;
+    
+    private List<String> cleansedNames;
     
     private List<String> nameUnigrams;
     
@@ -14,17 +16,25 @@ public class EntityQuery {
     
     private List<String> acronyms;
     
+    private EntityType type;
+    
     private EntityQuery(Builder builder) {
-        this.nameVariants = new ArrayList<>(builder.nameVariants);
+        this.rawNames = new ArrayList<>(builder.rawNames);
+        this.cleansedNames = new ArrayList<>(builder.cleansedNames);
         this.nameUnigrams = new ArrayList<>(builder.nameUnigrams);
         this.nameBigrams = new ArrayList<>(builder.nameBigrams);
         this.acronyms = new ArrayList<>(builder.acronyms);
+        this.type = builder.type;
     }
     
-    public List<String> getNameVariants() {
-        return nameVariants;
+    public List<String> getRawNames() {
+        return rawNames;
     }
 
+    public List<String> getCleansedNames() {
+        return cleansedNames;
+    }
+    
     public List<String> getNameUnigrams() {
         return nameUnigrams;
     }
@@ -37,26 +47,37 @@ public class EntityQuery {
         return acronyms;
     }
     
+    public EntityType getType() { 
+        return type;
+    }
+    
     public static Builder builder() {
         return new Builder();
     }
     
     public static class Builder {
         
-        private Collection<String> nameVariants;
+        private Collection<String> rawNames;
+        private Collection<String> cleansedNames;
         private Collection<String> nameUnigrams;
         private Collection<String> nameBigrams;
         private Collection<String> acronyms;
+        private EntityType type;
         
         private Builder() {
-            this.nameVariants = new ArrayList<>();
+            this.rawNames = new ArrayList<>();
             this.nameUnigrams = new ArrayList<>();
             this.nameBigrams = new ArrayList<>();
             this.acronyms = new ArrayList<>();
         }
         
-        public Builder withNameVariants(Collection<String> nameVariants) {
-            this.nameVariants = nameVariants;
+        public Builder withRawNames(Collection<String> nameVariants) {
+            this.rawNames = nameVariants;
+            return this;
+        }
+        
+        public Builder withCleansedNames(Collection<String> cleansedNames) {
+            this.cleansedNames = cleansedNames;
             return this;
         }
         
@@ -72,6 +93,11 @@ public class EntityQuery {
         
         public Builder withAcronyms(Collection<String> acronyms) {
             this.acronyms = acronyms;
+            return this;
+        }
+        
+        public Builder withType(EntityType type) {
+            this.type = type;
             return this;
         }
         

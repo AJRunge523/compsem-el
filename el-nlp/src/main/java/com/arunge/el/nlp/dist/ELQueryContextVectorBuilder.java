@@ -6,10 +6,10 @@ import java.io.IOException;
 import com.arunge.el.api.ContextType;
 import com.arunge.el.kb.text.MongoKBDocTextSource;
 import com.arunge.el.store.mongo.MongoEntityStore;
-import com.arunge.nlp.api.Corpus;
-import com.arunge.nlp.api.CorpusDocument;
+import com.arunge.nlp.corpus.Corpus;
+import com.arunge.nlp.corpus.CorpusBuilder;
+import com.arunge.nlp.corpus.CorpusDocument;
 import com.arunge.nlp.stanford.Tokenizers;
-import com.arunge.nlp.vocab.CorpusBuilder;
 import com.arunge.nlp.vocab.CountingVocabulary;
 import com.mongodb.MongoClient;
 

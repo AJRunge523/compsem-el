@@ -6,16 +6,23 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.arunge.el.api.EntityAttribute;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.nlp.api.FeatureDescriptor;
-import com.arunge.nlp.api.FeatureExtractor;
+import com.arunge.nlp.features.FeatureExtractor;
 
 public abstract class EntityFeatureExtractor implements FeatureExtractor<Pair<KBEntity, KBEntity>> {
 
     protected EntityAttribute queryAttribute;
     protected EntityAttribute candidateAttribute;
+    
+    /**
+     * Protected constructor for classes that implement alternative types of feature extractors.
+     */
+    protected EntityFeatureExtractor() {
+        
+    }
     
     /**
      * Initializes a feature extractor that operates on a particular entity attribute.

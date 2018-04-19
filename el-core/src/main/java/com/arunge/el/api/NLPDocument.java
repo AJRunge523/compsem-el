@@ -13,18 +13,34 @@ import com.arunge.nlp.api.AnnotatedToken;
 public class NLPDocument {
 
     private String id;
-        /* List of sentences containing annotated tokens */
+    
+    private EntityType entityType;
+    
+    /* List of sentences containing annotated tokens */
     private List<List<AnnotatedToken>> tokens;
     /* Map containing various distributional representations of the document */
     private Map<ContextType, Map<Integer, Double>> distributions;
     
     private Set<String> aliases;
     
+    /* Entities that refer to this entity in their own text */
+    private Set<String> inrefEntities;
+    
+    /* Entities that this entity refers to in its own text. */
+    private Set<String> outrefEntities;
+
+    /* Entities that refer to each other */
+    private Set<String> corefEntities;
+    
     public NLPDocument(String id) {
         this.id = id;
         this.tokens = new ArrayList<>();
         this.distributions = new HashMap<>();
         this.aliases = new HashSet<>();
+        this.inrefEntities = new HashSet<>();
+        this.outrefEntities = new HashSet<>();
+        this.corefEntities = new HashSet<>();
+        this.entityType = EntityType.UNK;
     }
 
     public String getId() {
@@ -69,6 +85,37 @@ public class NLPDocument {
     
     public Set<String> getAliases() { 
         return aliases;
+    }
+    public Set<String> getInrefEntities() {
+        return inrefEntities;
+    }
+
+    public void setInrefEntities(Collection<String> inrefEntities) {
+        this.inrefEntities = new HashSet<>(inrefEntities);
+    }
+    
+    public Set<String> getOutrefEntities() {
+        return outrefEntities;
+    }
+
+    public void setOutrefEntities(Collection<String> outrefEntities) {
+        this.outrefEntities = new HashSet<>(outrefEntities);
+    }
+
+    public Set<String> getCorefEntities() {
+        return corefEntities;
+    }
+
+    public void setCorefEntities(Collection<String> corefEntities) {
+        this.corefEntities = new HashSet<>(corefEntities);
+    }
+
+    public EntityType getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(EntityType entityType) {
+        this.entityType = entityType;
     }
     
 }

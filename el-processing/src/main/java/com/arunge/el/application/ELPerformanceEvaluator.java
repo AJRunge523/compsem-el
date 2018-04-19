@@ -18,8 +18,8 @@ public class ELPerformanceEvaluator {
     private static Logger LOG = LoggerFactory.getLogger(ELPerformanceEvaluator.class);
     
     public static void main(String[] args) throws IOException {
-        File goldFile = new File("src/main/resources/train-gold.txt");
-        File testFile = new File("output/test/el-evaluation.txt");
+        File goldFile = new File("src/main/resources/eval-gold.txt");
+        File testFile = new File("output/test/el-eval-eval.txt");
         ELPerformanceEvaluator.evaluate(goldFile, testFile);
     }
     
@@ -43,7 +43,7 @@ public class ELPerformanceEvaluator {
             String goldQueryId = goldParts[0];
             String goldEntityId = goldParts[1];
             String goldEntityType = "";
-            if(goldParts.length == 3) {
+            if(goldParts.length >= 3) {
                 goldEntityType = goldParts[2];
             } 
             
@@ -79,6 +79,7 @@ public class ELPerformanceEvaluator {
                 getOrAdd(entityTypeMacroAccuracy, goldEntityType, 0);
             }
         }
+        
         int numKBCorrect = elMicroAccuracy.get("KB").stream().reduce(0, (a, b) -> a + b);
         int numKB = elMicroAccuracy.get("KB").size();
         double kbMicroAverage = ((double) numKBCorrect) / numKB;

@@ -15,5 +15,10 @@
         <groupId>com.arunge.el</groupId>
         <artifactId>el-mongo-entity-store</artifactId>
     </dependency>
+    <dependency>
+	    <groupId>org.mapdb</groupId>
+	    <artifactId>mapdb</artifactId>
+	    <version>3.0.5</version>
+	</dependency>
   </dependencies>
 </project>

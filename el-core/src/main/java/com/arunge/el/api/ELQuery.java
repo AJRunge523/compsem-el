@@ -69,7 +69,9 @@ public class ELQuery {
             TextEntity te = new TextEntity(queryId);
             te.setName(name);
             te.setDocText(getDocContent().read());
-            te.putMetadata("gold", goldEntity);
+            if(goldEntity != null) {
+                te.putMetadata("gold", goldEntity);
+            }
             return te;
         } catch (IOException e) {
             throw new RuntimeException("Error reading document content from file.", e);

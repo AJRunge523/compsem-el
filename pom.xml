@@ -39,6 +39,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.arunge.el</groupId>
+            <artifactId>el-nlp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.arunge</groupId>
             <artifactId>unmei-iterators</artifactId>
             <version>0.0.2-SNAPSHOT</version>

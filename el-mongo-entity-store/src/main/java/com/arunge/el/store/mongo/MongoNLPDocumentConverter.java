@@ -38,6 +38,12 @@ public class MongoNLPDocumentConverter {
             ArrayList<String> aliases = (ArrayList<String>) doc.get(MongoNLPFields.COREF_ENTITIES);
             d.setCorefEntities(aliases);
         }
+        if(doc.containsKey(MongoNLPFields.INLINKS)) { 
+            d.setInLinks(doc.getDouble(MongoNLPFields.INLINKS));
+        }
+        if(doc.containsKey(MongoNLPFields.OUTLINKS)) { 
+            d.setOutLinks(doc.getDouble(MongoNLPFields.OUTLINKS));
+        }
         if(doc.containsKey(MongoNLPFields.NER_TYPE)) { 
             d.setEntityType(EntityType.valueOf(doc.getString(MongoNLPFields.NER_TYPE)));
         }

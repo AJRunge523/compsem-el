@@ -1,4 +1,4 @@
-package com.arunge.el.kb.text;
+package com.arunge.el.nlp.entities;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,13 +32,10 @@ public class ExtractEntities {
         File queryTextDir = new File("J://entity-linking-data//train-queries//");
         BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/train-entities-v2.txt")));
         for(File f : queryTextDir.listFiles()) {
-//            if(!f.getName().equals("EL013358.txt")) { 
-//                continue;
-//            }
             writer.write(f.getName().replaceAll(".txt", "") + "\n");
             System.out.println(f.getName());
             List<String> lines = Files.readLines(f, Charsets.UTF_8);
-            String content = lines.stream()/*.filter(line -> line.split("\\s+").length > 5).*/.reduce("", (a, b) -> a + "\n" + b);
+            String content = lines.stream().reduce("", (a, b) -> a + "\n" + b);
             Annotation document = pipeline.process(content);
             Set<Integer> corefIds = new HashSet<>();
             Map<Integer, String> repMentions = new HashMap<>();
@@ -46,7 +43,6 @@ public class ExtractEntities {
                 CorefMention cm = cc.getRepresentativeMention();
                 corefIds.add(cc.getChainID());
                 repMentions.put(cc.getChainID(), cm.toString());
-//                System.out.println("\t" + cc);
             }
             Map<Integer, List<String>> mentionClusters = new HashMap<>();
             for(CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {

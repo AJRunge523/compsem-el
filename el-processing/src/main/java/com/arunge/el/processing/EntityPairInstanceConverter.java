@@ -18,12 +18,14 @@ import com.arunge.el.api.KBEntity;
 import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.feature.BinningFeature;
 import com.arunge.el.feature.CosineSimilarity;
+import com.arunge.el.feature.DoubleValueFeature;
 import com.arunge.el.feature.EntityFeatureExtractor;
 import com.arunge.el.feature.FeatureCombination;
-import com.arunge.el.feature.JSDivergence;
 import com.arunge.el.feature.JaroWinkler;
 import com.arunge.el.feature.LevenshteinEditDistance;
 import com.arunge.el.feature.LongestCommonSubstringDistance;
+import com.arunge.el.feature.SetMatchFeature;
+import com.arunge.el.feature.SetOverlapFeature;
 import com.arunge.el.feature.StringMatchFeatureExtractor;
 import com.arunge.el.feature.StringOverlapFeatureExtractor;
 import com.arunge.el.feature.StringSetMatchFeatureExtractor;
@@ -65,6 +67,10 @@ public class EntityPairInstanceConverter {
         aliasFeatures.add(new StringSetMatchFeatureExtractor(EntityAttribute.NAME, EntityAttribute.ALIASES));
         aliasFeatures.add(
                 new StringSetMatchFeatureExtractor(EntityAttribute.CLEANSED_NAME, EntityAttribute.CLEANSED_ALIASES));
+        aliasFeatures.add(new StringMatchFeatureExtractor(EntityAttribute.ACRONYM));
+        aliasFeatures.add(new StringSetMatchFeatureExtractor(EntityAttribute.ACRONYM, EntityAttribute.ALIASES));
+        
+
         List<EntityFeatureExtractor> realAliasFeatures = new ArrayList<>();
         
         realAliasFeatures.add(new StringSetOverlapFeatureExtractor(EntityAttribute.NAME, EntityAttribute.ALIASES));
@@ -78,6 +84,7 @@ public class EntityPairInstanceConverter {
         realAliasFeatures.add(new StringMatchFeatureExtractor(EntityAttribute.ACRONYM));
         realAliasFeatures.add(new StringSetMatchFeatureExtractor(EntityAttribute.ACRONYM, EntityAttribute.ALIASES));
         
+                
         // Binned string features
         List<EntityFeatureExtractor> binnedNameFeatures = new ArrayList<>();
         binnedNameFeatures.add(new BinningFeature(new LevenshteinEditDistance(EntityAttribute.CLEANSED_NAME)));
@@ -97,7 +104,27 @@ public class EntityPairInstanceConverter {
                 new LongestCommonSubstringDistance(EntityAttribute.CLEANSED_NAME, EntityAttribute.CLEANSED_ALIASES)));
         
         //Features using entity coref
+        List<EntityFeatureExtractor> corefFeatures = new ArrayList<>();
+//        corefFeatures.add(new StringSetMatchFeatureExtractor(EntityAttribute.NAME, EntityAttribute.COREF_ENTITIES));
+        corefFeatures.add(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES));
+        corefFeatures.add(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES, EntityAttribute.OUTREF_ENTITIES));
+        corefFeatures.add(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES, EntityAttribute.INREF_ENTITIES));
+        
+        List<EntityFeatureExtractor> binnedCorefFeatures = new ArrayList<>();
+        binnedCorefFeatures.add(new BinningFeature(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES), 0.0f, 0.2f, 5));
+        binnedCorefFeatures.add(new BinningFeature(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES, EntityAttribute.OUTREF_ENTITIES), 0.0f, 0.2f, 5));
+        binnedCorefFeatures.add(new BinningFeature(new SetOverlapFeature(EntityAttribute.COREF_ENTITIES, EntityAttribute.INREF_ENTITIES), 0.0f, 0.2f, 5));
+        
+        //Features leveraging the wiki ontology of links
+        List<EntityFeatureExtractor> ontologyFeatures = new ArrayList<>();
+        ontologyFeatures.add(new DoubleValueFeature(EntityAttribute.IN_LINKS));
+        ontologyFeatures.add(new DoubleValueFeature(EntityAttribute.OUT_LINKS));
+        
+        List<EntityFeatureExtractor> binnedOntologyFeatures = new ArrayList<>();
 
+        binnedOntologyFeatures.add(new BinningFeature(new DoubleValueFeature(EntityAttribute.IN_LINKS), 8));
+        binnedOntologyFeatures.add(new BinningFeature(new DoubleValueFeature(EntityAttribute.OUT_LINKS), 8));
+        
         //Semantic-y features
         List<EntityFeatureExtractor> nerFeatures = new ArrayList<>();
         nerFeatures.add(new StringMatchFeatureExtractor(EntityAttribute.ENTITY_TYPE));
@@ -140,39 +167,58 @@ public class EntityPairInstanceConverter {
 //        distFeatures.add(new JSDivergence(EntityAttribute.TOPIC_500));
         
         List<EntityFeatureExtractor> binnedDistFeatures = new ArrayList<>();
-        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.CONTEXT_VECTOR), 8));
+        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.CONTEXT_VECTOR), 3));
 //        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_25), 8));
 //        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_25), 8));
 //        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_50), 8));
 //        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_50), 8));
 //        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_100), 8));
 //        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_100), 8));
-//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_200), 8));
-//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_200), 8));
-//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_300), 8));
-//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_300), 8));
-//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_400), 8));
-//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_400), 8));
-//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_500), 8));
-//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_500), 8));
+//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_200), 3));
+//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_200), 3));
+//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_300), 3));
+//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_300), 3));
+//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_400), 3));
+//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_400), 3));
+//        binnedDistFeatures.add(new BinningFeature(new CosineSimilarity(EntityAttribute.TOPIC_500), 3));
+//        binnedDistFeatures.add(new BinningFeature(new JSDivergence(EntityAttribute.TOPIC_500), 3));
         
         //Feature Combinations
         
 //        extractors.addAll(nameFeatures);
+//        extractors.addAll(binnedNameFeatures);
+
         extractors.addAll(aliasFeatures);
         extractors.addAll(realAliasFeatures);
-//        extractors.addAll(binnedNameFeatures);
         extractors.addAll(binnedAliasFeatures);
         extractors.addAll(nerFeatures);
         extractors.addAll(nerTypeFeatures);
-        extractors.addAll(distFeatures);
-        extractors.addAll(binnedDistFeatures);
+        extractors.addAll(ontologyFeatures);
+        extractors.addAll(binnedOntologyFeatures);
+//        extractors.addAll(distFeatures);
+//        extractors.addAll(binnedDistFeatures);
+        extractors.addAll(corefFeatures);
+        extractors.addAll(binnedCorefFeatures);
+
         
-        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedAliasFeatures));
-        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, aliasFeatures));
-        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedDistFeatures));
-        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedAliasFeatures, binnedDistFeatures));
-        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, aliasFeatures, binnedDistFeatures));
+//        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedAliasFeatures));
+//        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, aliasFeatures));
+//        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedOntologyFeatures));
+//        featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedCorefFeatures));
+//        featureCombinations.add(Lists.newArrayList(binnedOntologyFeatures, binnedCorefFeatures));
+//        featureCombinations.add(Lists.newArrayList(binnedCorefFeatures, binnedAliasFeatures, nerTypeFeatures));
+//        featureCombinations.add(Lists.newArrayList(aliasFeatures, nerTypeFeatures, binnedCorefFeatures));
+        
+//      featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedDistFeatures));
+//      featureCombinations.add(Lists.newArrayList(nerTypeFeatures, binnedAliasFeatures, binnedDistFeatures));
+//      featureCombinations.add(Lists.newArrayList(nerTypeFeatures, aliasFeatures, binnedDistFeatures));
+        
+        //CURRENTLY UNUSED
+//      featureCombinations.add(Lists.newArrayList(nameFeatures, nerTypeFeatures)); 
+//      featureCombinations.add(Lists.newArrayList(aliasFeatures, binnedCorefFeatures));
+
+        
+
         return new EntityPairInstanceConverter(extractors, featureCombinations);
     }
     
@@ -241,15 +287,7 @@ public class EntityPairInstanceConverter {
     
     public Map<Integer, Double> createNil(){ 
         Map<Integer, Double> instance = new HashMap<>();
-        for(Map.Entry<FeatureDescriptor, Integer> feat : indexer) {
-            if(feat.getValue() == 0) {
-                continue;
-            } else if(feat.getValue() == 1) {
-                instance.put(feat.getValue(), 1.0);
-            } else {
-                instance.put(feat.getValue(), 0.0);
-            }
-        }
+        instance.put(1, 1.0);
         return instance;
     }
     

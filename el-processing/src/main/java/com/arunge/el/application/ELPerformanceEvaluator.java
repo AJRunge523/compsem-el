@@ -18,8 +18,8 @@ public class ELPerformanceEvaluator {
     private static Logger LOG = LoggerFactory.getLogger(ELPerformanceEvaluator.class);
     
     public static void main(String[] args) throws IOException {
-        File goldFile = new File("src/main/resources/eval-gold.txt");
-        File testFile = new File("output/test/el-eval-eval.txt");
+        File goldFile = new File("src/main/resources/dev-nonil-gold.txt");
+        File testFile = new File("output/runs/nonil/All Coref NER Combos/el-eval-dev.txt");
         ELPerformanceEvaluator.evaluate(goldFile, testFile);
     }
     
@@ -79,13 +79,19 @@ public class ELPerformanceEvaluator {
                 getOrAdd(entityTypeMacroAccuracy, goldEntityType, 0);
             }
         }
-        
         int numKBCorrect = elMicroAccuracy.get("KB").stream().reduce(0, (a, b) -> a + b);
         int numKB = elMicroAccuracy.get("KB").size();
         double kbMicroAverage = ((double) numKBCorrect) / numKB;
-        int numNILCorrect = elMicroAccuracy.get("NIL").stream().reduce(0, (a, b) -> a + b);
-        int numNIL = elMicroAccuracy.get("NIL").size();
-        double nilMicroAverage = ((double) numNILCorrect) / numNIL;
+        double numNILCorrect = 0;
+        double nilMicroAverage = 0;
+        int numNIL = 0;
+        if(elMicroAccuracy.containsKey("NIL")) {
+            numNIL = elMicroAccuracy.get("NIL").size();
+            if(numNIL != 0) {
+                numNILCorrect = elMicroAccuracy.get("NIL").stream().reduce(0, (a, b) -> a + b);
+                nilMicroAverage = ((double) numNILCorrect) / numNIL;
+            }
+        }
         double totalAverage = (((double) numKBCorrect) + numNILCorrect) / (numKB + numNIL);
         int totalNumQueries = numKB + numNIL;
         LOG.info("Micro-Averages:");

@@ -32,6 +32,9 @@ public class NLPDocument {
     /* Entities that refer to each other */
     private Set<String> corefEntities;
     
+    private double inLinks;
+    private double outLinks;
+    
     public NLPDocument(String id) {
         this.id = id;
         this.tokens = new ArrayList<>();
@@ -41,6 +44,8 @@ public class NLPDocument {
         this.outrefEntities = new HashSet<>();
         this.corefEntities = new HashSet<>();
         this.entityType = EntityType.UNK;
+        this.inLinks = 0.0;
+        this.outLinks = 0.0;
     }
 
     public String getId() {
@@ -116,6 +121,22 @@ public class NLPDocument {
 
     public void setEntityType(EntityType entityType) {
         this.entityType = entityType;
+    }
+
+    public double getInLinks() {
+        return inLinks;
+    }
+
+    public void setInLinks(double inLinks) {
+        this.inLinks = inLinks;
+    }
+
+    public double getOutLinks() {
+        return outLinks;
+    }
+
+    public void setOutLinks(double outLinks) {
+        this.outLinks = outLinks;
     }
     
 }

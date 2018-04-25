@@ -21,6 +21,10 @@ public enum EntityAttribute {
     INREF_ENTITIES,
     OUTREF_ENTITIES,
     COREF_ENTITIES,
+    OUT_LINKS,
+    IN_LINKS,
+    ENT_IB_DIST,
+    ENT_CN_IB_DIST,
     GOLD_LABEL,
     GOLD_NER
 }

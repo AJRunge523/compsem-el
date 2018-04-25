@@ -24,7 +24,7 @@ public class LoadSennaNER {
             TextEntity e = store.fetchKBText(entityId).get();
             KBEntity kbe = store.fetchEntity(entityId).get();
             String[] nameWords = e.getName().split(" ");
-            System.out.println(entityId + ", " + e.getName());
+//            System.out.println(entityId + ", " + e.getName());
             boolean typeFound = false;
             try(BufferedReader reader = new BufferedReader(new FileReader(f))) {
                 String line = "";
@@ -32,6 +32,9 @@ public class LoadSennaNER {
                 while((line = reader.readLine()) != null) {
                     String[] lineParts = line.trim().split("\\s+");
                     String word  = lineParts[0];
+                    if(word.equals("Lexington")) { 
+                        System.out.println(f.getName());
+                    }
                     if(word.equals(nameWords[matchedWord])) {
                         matchedWord += 1;
                         if(matchedWord == nameWords.length) {
@@ -46,14 +49,24 @@ public class LoadSennaNER {
                             } else {
                                 type = EntityType.UNK;
                             }
-                            if(kbe.getType().equals(EntityType.UNK)) {
-                                store.updateNLPDocument(kbe.getId(), MongoNLPFields.NER_TYPE, type.name());
+                            if(type.equals(EntityType.GPE)) {
+                                String next = reader.readLine();
+                                String[] nextParts = next.trim().split("\\s+");
+                                if(nextParts[0].equals(",")) {
+                                    nextParts = reader.readLine().trim().split("\\s+");
+                                    if(nextParts[0].matches("[A-Z]{2}")) {
+                                        System.out.println(word + ", " + nextParts[0]);
+                                    }
+                                }
                             }
-                            if(kbe.getType().equals(type)) {
-                                System.out.println("Types matched: " + type);
-                            } else {
-                                System.out.println("Type mismatch. Stanford: " + kbe.getType() + ", Senna: " + type);
-                            }
+//                            if(kbe.getType().equals(EntityType.UNK)) {
+//                                store.updateNLPDocument(kbe.getId(), MongoNLPFields.NER_TYPE, type.name());
+//                            }
+//                            if(kbe.getType().equals(type)) {
+//                                System.out.println("Types matched: " + type);
+//                            } else {
+//                                System.out.println("Type mismatch. Stanford: " + kbe.getType() + ", Senna: " + type);
+//                            }
                             typeFound = true;
                             break;
                         }
@@ -61,9 +74,9 @@ public class LoadSennaNER {
                 }
                 
             }
-            if(!typeFound) { 
-                System.out.println(entityId + " had no type.");
-            }
+//            if(!typeFound) { 
+//                System.out.println(entityId + " had no type.");
+//            }
         }
         
         client.close();

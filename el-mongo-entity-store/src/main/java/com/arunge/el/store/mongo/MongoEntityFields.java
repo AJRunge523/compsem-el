@@ -29,6 +29,10 @@ public class MongoEntityFields {
     public static String INREF_ENTITIES = "inent";
     public static String OUTREF_ENTITIES = "outent";
     public static String COREF_ENTITIES = "coent";
+    public static String IN_LINKS = "inlink_norm";
+    public static String OUT_LINKS = "outlink_norm";
+    public static String ENT_CN_IB_DIST = "ent_cn_ib_dist";
+    public static String ENT_IB_DIST = "ent_ib_dist";
     
     
     private static Map<String, EntityAttribute> attrLookup;
@@ -57,6 +61,10 @@ public class MongoEntityFields {
         attrLookup.put(INREF_ENTITIES, EntityAttribute.INREF_ENTITIES);
         attrLookup.put(OUTREF_ENTITIES, EntityAttribute.OUTREF_ENTITIES);
         attrLookup.put(COREF_ENTITIES, EntityAttribute.COREF_ENTITIES);
+        attrLookup.put(OUT_LINKS, EntityAttribute.OUT_LINKS);
+        attrLookup.put(IN_LINKS, EntityAttribute.IN_LINKS);
+        attrLookup.put(ENT_CN_IB_DIST, EntityAttribute.ENT_CN_IB_DIST);
+        attrLookup.put(ENT_IB_DIST, EntityAttribute.ENT_IB_DIST);
         
         fieldLookup = new HashMap<>();
         fieldLookup.put(EntityAttribute.NAME, KB_NAME);
@@ -80,6 +88,10 @@ public class MongoEntityFields {
         fieldLookup.put(EntityAttribute.INREF_ENTITIES, INREF_ENTITIES);
         fieldLookup.put(EntityAttribute.OUTREF_ENTITIES, OUTREF_ENTITIES);
         fieldLookup.put(EntityAttribute.COREF_ENTITIES, COREF_ENTITIES);
+        fieldLookup.put(EntityAttribute.OUT_LINKS, OUT_LINKS);
+        fieldLookup.put(EntityAttribute.IN_LINKS, IN_LINKS);
+        fieldLookup.put(EntityAttribute.ENT_CN_IB_DIST, ENT_CN_IB_DIST);
+        fieldLookup.put(EntityAttribute.ENT_IB_DIST, ENT_IB_DIST);
         
     }
     

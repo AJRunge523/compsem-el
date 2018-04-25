@@ -3,6 +3,7 @@ package com.arunge.el.processing.utils;
 import java.util.stream.Stream;
 
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.nlp.dist.ContextStore;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.google.common.collect.Sets;
@@ -17,7 +18,7 @@ public class EntityRetrievalTester {
         e.setName("Matthaeus");
         e.setCleansedName("Matthaeus");
         e.setCleansedAliases(new String[] {"lothar matthaeus"});
-        EntityCandidateRetrievalEngine engine = new EntityCandidateRetrievalEngine(store);
+        EntityCandidateRetrievalEngine engine = new EntityCandidateRetrievalEngine(store, ContextStore.getDefault());
         Stream<KBEntity> entities = engine.retrieveCandidates(e);
         entities.forEach(ent -> System.out.println(ent.getId() + ", " + ent.getName()));
         

@@ -20,6 +20,10 @@
         <artifactId>el-mongo-entity-store</artifactId>
       </dependency>
       <dependency>
+        <groupId>com.arunge.el</groupId>
+        <artifactId>el-nlp</artifactId>
+      </dependency>
+      <dependency>
 		  <groupId>com.arunge</groupId>
 		  <artifactId>unmei-nlp</artifactId>
 	  </dependency>
@@ -27,6 +31,7 @@
           <groupId>com.arunge</groupId>
           <artifactId>unmei-ml</artifactId>
       </dependency>
+      
   </dependencies>
   
 </project>

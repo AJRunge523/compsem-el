@@ -52,6 +52,14 @@ public class EntityAttributeTypes {
             return SetAttribute.class;
         case OUTREF_ENTITIES:
             return SetAttribute.class;
+        case IN_LINKS:
+            return DoubleAttribute.class;
+        case OUT_LINKS:
+            return DoubleAttribute.class;
+        case ENT_IB_DIST:
+            return SparseVectorAttribute.class;
+        case ENT_CN_IB_DIST:
+            return SparseVectorAttribute.class;
         default:
             return null;
         }
@@ -110,6 +118,14 @@ public class EntityAttributeTypes {
             return wrapSet(val);
         case OUTREF_ENTITIES:
             return wrapSet(val);
+        case IN_LINKS:
+            return wrapDouble(val);
+        case OUT_LINKS:
+            return wrapDouble(val);
+        case ENT_IB_DIST:
+            return wrapVector(val);
+        case ENT_CN_IB_DIST:
+            return wrapVector(val);
         default:
             throw new RuntimeException("Unknown attribute: " + attr.name());
         }
@@ -119,6 +135,14 @@ public class EntityAttributeTypes {
         try {
             return Optional.of(StringAttribute.valueOf((String) val));
         } catch (ClassCastException e) {
+            return Optional.empty();
+        }
+    }
+    
+    public static Optional<Attribute> wrapDouble(Object val) {
+        try {
+            return Optional.of(new DoubleAttribute((double) val));
+        } catch (ClassCastException e) { 
             return Optional.empty();
         }
     }

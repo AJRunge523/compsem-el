@@ -6,10 +6,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.arunge.el.api.ContextType;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.EntityQuery;
 import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.attribute.DenseVectorAttribute;
+import com.arunge.el.attribute.EntityAttribute;
+import com.arunge.el.attribute.SparseVectorAttribute;
+import com.arunge.el.nlp.dist.ContextStore;
 import com.arunge.unmei.iterators.Iterators;
 
 /**
@@ -24,14 +29,19 @@ import com.arunge.unmei.iterators.Iterators;
  */
 public class EntityCandidateRetrievalEngine {
 
-    private EntityKBStore store;
+    private EntityKBStore entities;
+    private ContextStore contexts;
     
-    
-    public EntityCandidateRetrievalEngine(EntityKBStore store) { 
-        this.store = store;
+    public EntityCandidateRetrievalEngine(EntityKBStore entities, ContextStore contexts) { 
+        this.entities = entities;
+        this.contexts = contexts;
     }
     
     public Stream<KBEntity> retrieveCandidates(KBEntity queryEntity) {
+        return retrieveCandidates(queryEntity, ContextType.NORM_TFIDF);
+    }
+    
+    public Stream<KBEntity> retrieveCandidates(KBEntity queryEntity, ContextType type) {
         EntityQuery.Builder queryBuilder = EntityQuery.builder();
         List<String> names = new ArrayList<>();
         List<String> cleansedNames = new ArrayList<>();
@@ -44,6 +54,7 @@ public class EntityCandidateRetrievalEngine {
         if(queryEntity.getCleansedAliases().isPresent()) {
             cleansedNames.addAll(queryEntity.getCleansedAliases().get());
         }
+        
         queryBuilder = queryBuilder.withRawNames(names)
                 .withCleansedNames(cleansedNames);
         if(queryEntity.getAcronym().isPresent() && !queryEntity.getAcronym().get().trim().isEmpty()) {
@@ -54,9 +65,8 @@ public class EntityCandidateRetrievalEngine {
         queryBuilder = queryBuilder.withType(queryEntity.getType());
         EntityQuery query = queryBuilder.build();
         
-        return Iterators.toStream(store.query(query)).filter(e -> {
+        return Iterators.toStream(entities.query(query)).filter(e -> {
             String queryAcr = queryEntity.getAcronym().orElse("").trim();
-            String entAcr = e.getAcronym().orElse("");
             
             //Filter Condition 1: Remove UNK and person type entities if the query is an acronym
             if((e.getType() == EntityType.UNK || e.getType() == EntityType.PERSON) && !(e.getCleansedName().equals(queryEntity.getCleansedName()))) {
@@ -78,6 +88,12 @@ public class EntityCandidateRetrievalEngine {
             }
             return true;
             
+        }).map(e -> {
+            if(!type.equals(ContextType.NORM_TFIDF)) { 
+                double[] contextVec = contexts.getContext(type, e.getId());
+                e.setAttribute(EntityAttribute.CONTEXT_VECTOR, DenseVectorAttribute.valueOf(contextVec));
+            }
+            return e;           
         });
     }
     

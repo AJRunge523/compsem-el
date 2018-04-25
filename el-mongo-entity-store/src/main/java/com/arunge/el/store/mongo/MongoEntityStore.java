@@ -152,7 +152,9 @@ public class MongoEntityStore implements EntityKBStore {
                 vals.add(d);
             }
             update.append(field, vals);
-        } 
+        }  else if(value instanceof Double) {
+            update.append(field, value);
+        }
         nlpDocs.updateOne(eq("_id", id), new Document("$set", update));
     }
 
@@ -185,6 +187,12 @@ public class MongoEntityStore implements EntityKBStore {
     @Override
     public CloseableIterator<KBEntity> allEntities() {
         return CloseableIterators.wrap(Iterators.map(entities.find().noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
+    }
+    
+    @Override
+    public CloseableIterator<KBEntity> queryByName(String name) {
+        Bson query = eq(CANONICAL_NAME, name);
+        return CloseableIterators.wrap(Iterators.map(entities.find(query).noCursorTimeout(true).iterator(), MongoEntityConverter::toEntity));
     }
     
     @Override
@@ -251,5 +259,5 @@ public class MongoEntityStore implements EntityKBStore {
         this.entities.createIndex(Indexes.descending(ALIASES));
         this.entities.createIndex(Indexes.descending(CLEANSED_ALIASES));
     }
-    
+
 }

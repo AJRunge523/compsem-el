@@ -29,7 +29,7 @@ public class MapDBContextLoader {
         }
         
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore entityStore = MongoEntityStore.evalStore(client);
+        MongoEntityStore entityStore = MongoEntityStore.kbStore(client);
         CloseableIterator<NLPDocument> docs = entityStore.allNLPDocuments();
         int numProcessed = 0;
         while(docs.hasNext()) {
@@ -67,7 +67,7 @@ public class MapDBContextLoader {
         ContextStore contextStore = new ContextStore(new File("J:\\Education\\CMU\\2018\\Spring\\Computational Semantics\\Entity Linking\\external_evals\\context_dbs\\contexts.db"), types);
         
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore entityStore = MongoEntityStore.evalStore(client);
+        MongoEntityStore entityStore = MongoEntityStore.kbStore(client);
         CloseableIterator<TextEntity> text = entityStore.allKBText();
         while(text.hasNext()) {
             TextEntity doc = text.next();
@@ -77,6 +77,7 @@ public class MapDBContextLoader {
                 if(dist == null) { 
                     throw new RuntimeException("Boo");
                 }
+                System.out.println(type + ", " + dist[299]);
             }
         }
         contextStore.close();

@@ -1,6 +1,5 @@
 package com.arunge.el.store.mongo;
 
-import static com.arunge.el.store.mongo.MongoEntityFields.GOLD_LABEL;
 import static com.arunge.el.store.mongo.MongoEntityFields.ID;
 import static com.arunge.el.store.mongo.MongoEntityFields.KB_NAME;
 
@@ -11,6 +10,7 @@ import org.bson.Document;
 
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.DoubleAttribute;
 import com.arunge.el.attribute.EntityAttribute;
 import com.arunge.el.attribute.EntityAttributeTypes;
 import com.arunge.el.attribute.SetAttribute;
@@ -39,6 +39,9 @@ public class MongoEntityConverter {
             } else if(val instanceof SparseVectorAttribute) {
                 SparseVectorAttribute sva = (SparseVectorAttribute) val;
                 document.append(field, convertMap(sva.getValue()));
+            } else if(val instanceof DoubleAttribute) {
+                DoubleAttribute doubleAttr = (DoubleAttribute) val;
+                document.append(field, doubleAttr.getValue());
             }
         }
         
@@ -70,7 +73,7 @@ public class MongoEntityConverter {
                 continue;
             }
             Class<? extends Attribute> attrClass = EntityAttributeTypes.getAttrType(attr);
-            if(attrClass.equals(StringAttribute.class) || attrClass.equals(SetAttribute.class)) {
+            if(attrClass.equals(StringAttribute.class) || attrClass.equals(SetAttribute.class) || attrClass.equals(DoubleAttribute.class)) {
                 e.setAttribute(attr, EntityAttributeTypes.wrapValue(attr, d.get(field)).get());
             } else if(attrClass.equals(SparseVectorAttribute.class)) {
                 Map<Integer, Double> vector = convertVector((Document) d.get(field));

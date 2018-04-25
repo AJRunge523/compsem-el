@@ -31,6 +31,8 @@ public class NameExtractor implements AttributeExtractor {
 
     private Tokenizer tokenizer;
     
+    
+    
     public NameExtractor() {
         List<TokenFilter> filters = new ArrayList<>();
         filters.add(TokenFilters.stopwords());

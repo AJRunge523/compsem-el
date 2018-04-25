@@ -14,10 +14,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.arunge.el.api.ContextType;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.attribute.Attribute;
+import com.arunge.el.attribute.DenseVectorAttribute;
 import com.arunge.el.attribute.EntityAttribute;
+import com.arunge.el.attribute.StringAttribute;
+import com.arunge.el.nlp.dist.ContextStore;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
 import com.arunge.el.processing.EntityPairInstanceConverter;
 import com.arunge.el.store.mongo.MongoEntityStore;
@@ -36,73 +40,85 @@ public class EntityLinkingEvaluation {
 
     private static Logger LOG = LoggerFactory.getLogger(EntityLinkingEvaluation.class);
     
-    public static void main(String[] args) throws IOException { 
-        evalEval(new MongoClient("localhost", 27017), "el-eval-eval.txt");
+    private MongoClient client;
+    private ContextStore contexts;
+    private EntityCandidateRetrievalEngine candidateRetrieval;
+    private ContextType contextType;
+    
+    public EntityLinkingEvaluation(MongoClient client, ContextStore contexts, 
+            EntityCandidateRetrievalEngine candidateRetrieval, ContextType context) { 
+        this.client = client;
+        this.candidateRetrieval = candidateRetrieval;
+        this.contextType = context;
+        this.contexts = contexts;
     }
     
-    public static void evalEval(MongoClient client, String evalFileName) throws IOException {
-        EntityKBStore kbStore = MongoEntityStore.kbStore(client);
+    public void evalEval(String evalFileName, boolean evalNil) throws IOException {
         EntityKBStore queryStore = MongoEntityStore.evalStore(client); 
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
         
         EntityPairInstanceConverter instanceConverter = EntityPairInstanceConverter.currentSet();
         
         Path goldFile = Paths.get("src/main/resources/eval-gold.txt");
+        if(!evalNil) { 
+            goldFile = Paths.get("src/main/resources/eval-nonil-gold.txt");
+        }
         
         Path modelFile = Paths.get("output/test/model.model");
         
         Path outputFile = Paths.get("output/test/", evalFileName);
-        evaluate(queryStore.allEntities(), candidateRetrieval, instanceConverter, modelFile, outputFile, goldFile);
+        evaluate(queryStore.allEntities(), instanceConverter, evalNil, modelFile, outputFile, goldFile);
     }
     
-    public static void evalDev(MongoClient client, String evalFileName, Set<String> devIds) throws IOException {
-        EntityKBStore kbStore = MongoEntityStore.kbStore(client);
+    public void evalDev(String evalFileName, Set<String> devIds, boolean evalNil) throws IOException {
         EntityKBStore queryStore = MongoEntityStore.trainStore(client); 
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
-        
         EntityPairInstanceConverter instanceConverter = EntityPairInstanceConverter.currentSet();
         
         Path goldFile = Paths.get("src/main/resources/dev-gold.txt");
+        if(!evalNil) { 
+            goldFile = Paths.get("src/main/resources/dev-nonil-gold.txt");
+        }
         
         Path modelFile = Paths.get("output/test/model.model");
         Path outputFile = Paths.get("output/test/", evalFileName);
-        evaluate(queryStore.allEntities(), devIds, new HashSet<>(), candidateRetrieval, instanceConverter, modelFile, outputFile, goldFile);
+        evaluate(queryStore.allEntities(), devIds, new HashSet<>(), instanceConverter, evalNil, modelFile, outputFile, goldFile);
     }
     
-    public static void evalTrain(MongoClient client, String evalFileName) throws IOException {
-        EntityKBStore kbStore = MongoEntityStore.kbStore(client);
+    public void evalTrain(String evalFileName, boolean evalNil) throws IOException {
         EntityKBStore queryStore = MongoEntityStore.trainStore(client); 
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
         
         EntityPairInstanceConverter instanceConverter = EntityPairInstanceConverter.currentSet();
         
         Path goldFile = Paths.get("src/main/resources/train-gold-full.txt");
+        if(!evalNil) { 
+            goldFile = Paths.get("src/main/resources/train-nonil-gold-full.txt");
+        }
         
         Path modelFile = Paths.get("output/test/model.model");
         Path outputFile = Paths.get("output/test/", evalFileName);
-        evaluate(queryStore.allEntities(), candidateRetrieval, instanceConverter, modelFile, outputFile, goldFile);
+        evaluate(queryStore.allEntities(), instanceConverter, evalNil, modelFile, outputFile, goldFile);
     }
     
-    public static void evalTrain(MongoClient client, String evalFileName, Set<String> devIds) throws IOException {
-        EntityKBStore kbStore = MongoEntityStore.kbStore(client);
+    public void evalTrain(String evalFileName, Set<String> devIds, boolean evalNil) throws IOException {
         EntityKBStore queryStore = MongoEntityStore.trainStore(client); 
-        EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
         
         EntityPairInstanceConverter instanceConverter = EntityPairInstanceConverter.currentSet();
         
         Path goldFile = Paths.get("src/main/resources/train-gold.txt");
+        if(!evalNil) { 
+            goldFile = Paths.get("src/main/resources/train-nonil-gold.txt");
+        }
         
         Path modelFile = Paths.get("output/test/model.model");
         Path outputFile = Paths.get("output/test/", evalFileName);
-        evaluate(queryStore.allEntities(), new HashSet<>(), devIds, candidateRetrieval, instanceConverter, modelFile, outputFile, goldFile);
+        evaluate(queryStore.allEntities(), new HashSet<>(), devIds, instanceConverter, evalNil, modelFile, outputFile, goldFile);
     }
     
-    private static void evaluate(CloseableIterator<KBEntity> queryIter, EntityCandidateRetrievalEngine candidateRetrieval, 
-            EntityPairInstanceConverter instanceConverter, Path modelFile, Path outputFile, Path goldFile) throws IOException {
-        evaluate(queryIter, new HashSet<>(), new HashSet<>(), candidateRetrieval, instanceConverter, modelFile, outputFile, goldFile);
+    private void evaluate(CloseableIterator<KBEntity> queryIter, EntityPairInstanceConverter instanceConverter, boolean evalNil,  
+            Path modelFile, Path outputFile, Path goldFile) throws IOException {
+        evaluate(queryIter, new HashSet<>(), new HashSet<>(), instanceConverter, evalNil, modelFile, outputFile, goldFile);
     }
-    private static void evaluate(CloseableIterator<KBEntity> queryIter, Set<String> idsToEval, Set<String> idsToSkip, EntityCandidateRetrievalEngine candidateRetrieval, 
-            EntityPairInstanceConverter instanceConverter, Path modelFile, Path outputFile, Path goldFile) throws IOException {
+    private void evaluate(CloseableIterator<KBEntity> queryIter, Set<String> idsToEval, Set<String> idsToSkip, 
+            EntityPairInstanceConverter instanceConverter, boolean evalNil, Path modelFile, Path outputFile, Path goldFile) throws IOException {
         Path evalFile = Paths.get("output/test/query.eval");
         Path queryEvalFile = Paths.get("output/test/query-out.eval");
         SVMRank candidateRanker = new SVMRank(Paths.get("J:\\Program Files\\SVMRank"));
@@ -116,6 +132,10 @@ public class EntityLinkingEvaluation {
             } else if(idsToSkip.contains(queryEntity.getId())) {
                 continue;
             }
+            if(contextType != ContextType.NORM_TFIDF) {
+                double[] context = contexts.getContext(contextType, queryEntity.getId());
+                queryEntity.setAttribute(EntityAttribute.CONTEXT_VECTOR, DenseVectorAttribute.valueOf(context));
+            }
             numQueries += 1;
             BufferedWriter trainWriter = new BufferedWriter(new FileWriter(evalFile.toFile()));
             int queryId = numQueries;
@@ -125,9 +145,12 @@ public class EntityLinkingEvaluation {
             if(goldAttr != null) {
                 goldId = goldAttr.getValueAsStr();
             }
+            if(goldId.startsWith("NIL") && !evalNil) {
+                continue;
+            }
             
             //Retrieve the candidates
-            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity).collect(Collectors.toList());
+            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity, contextType).collect(Collectors.toList());
             candidates.add(new KBEntity("NIL"));
             //Write the candidate instances to a file for processing by the ranker
             List<String> instanceStrings = candidates.stream().map(candidate -> {
@@ -165,7 +188,12 @@ public class EntityLinkingEvaluation {
 //            if(maxScore > 0) {
 //                bestId = bestCandidate.getId();
 //            }
-            evalWriter.write(queryEntity.getId() + "\t" + bestId + (goldId != null? "\t" + goldId : "") + "\n");
+            Attribute candName = bestCandidate.getAttribute(EntityAttribute.NAME);
+            if(candName == null) {
+                candName = StringAttribute.valueOf("NIL");
+            }
+            evalWriter.write(queryEntity.getId() + "\t" + bestId + (goldId != null? "\t" + goldId : "") + 
+                    (bestId.equals(goldId) ? "" : "\t*\t" + queryEntity.getAttribute(EntityAttribute.GOLD_NER) + "\t" + queryEntity.getType() + "\t" + candName + "\t" + queryEntity.getName()) + "\n");
             if(numQueries % 100 == 0) {
                 LOG.info("Evaluated {} queries.", numQueries);
             }

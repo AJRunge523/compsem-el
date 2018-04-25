@@ -35,6 +35,8 @@ public class NERAccuracy {
                 positives += 1;
             } else if(goldNER.equals("ORG") && (ner.name().equals("ORG") || ner.name().equals("UNK"))) {
                 positives += 1;
+            } else {
+                System.out.println(e.getId());
             }
             total += 1;
         }

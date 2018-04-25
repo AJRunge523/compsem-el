@@ -1,4 +1,4 @@
-package com.arunge.el.kb.text;
+package com.arunge.el.nlp.entities;
 
 import java.io.BufferedReader;
 import java.io.File;

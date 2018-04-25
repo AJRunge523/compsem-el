@@ -6,7 +6,7 @@ import com.mongodb.MongoClient;
 
 public class KBEntityConversion {
 
-    private static String store = "train";
+    private static String store = "eval";
     
     public static void main(String[] args) {
         MongoClient client = new MongoClient("localhost", 27017);
@@ -22,7 +22,7 @@ public class KBEntityConversion {
         case "train":
             es = MongoEntityStore.trainStore(client);
             es.clearEntities();
-            pipeline = new KBEntityConverter(true);
+            pipeline = new KBEntityConverter(false);
             pipeline.process(es);
             break;
         case "eval":

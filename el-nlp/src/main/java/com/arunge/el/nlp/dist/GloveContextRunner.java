@@ -16,7 +16,8 @@ import com.arunge.nlp.api.Token;
 import com.arunge.nlp.api.Tokenizer;
 import com.arunge.nlp.stanford.Tokenizers;
 import com.arunge.nlp.vocab.CountingVocabulary;
-import com.arunge.unmei.iterators.CloseableIterator;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.mongodb.MongoClient;
 
 public class GloveContextRunner {
@@ -28,24 +29,26 @@ public class GloveContextRunner {
     public static void main(String[] args) throws IOException {
         MongoClient client = new MongoClient("localhost", 27017);
         MongoEntityStore store = MongoEntityStore.kbStore(client);
-        CloseableIterator<TextEntity> textEntities = store.allKBText();
         Tokenizer tokenizer = Tokenizers.getDefaultFiltered();
-        MapDBGloveStore glove = new MapDBGloveStore("glove.db");
+        MapDBGloveStore glove = new MapDBGloveStore("J:/glove/glove.db");
         CountingVocabulary indexer = CountingVocabulary.read(new File("output/kb-tfidf-length_norm-corpus.vocab"));
+        ContextStore contexts = ContextStore.getDefault();
         int numProcessed = 0;
-        while(textEntities.hasNext()) {
-            TextEntity e = textEntities.next();
+        List<String> ids = Files.readLines(new File("src/main/resources/candIds.txt"), Charsets.UTF_8);
+        for(String id : ids) {
+            TextEntity e = store.fetchKBText(id).get();
             String content = e.getDocText();
             List<Token> tokens = tokenizer.tokenizeToList(content);
             Map<ContextType, double[]> vectors = createContextVectors(glove, tokens, WINDOW_SIZE, indexer);
             for(ContextType type : vectors.keySet()) { 
-                store.updateNLPDocument(e.getId(), type.name(), vectors.get(type));
+                contexts.putContext(type, e.getId(), vectors.get(type));
             }
             numProcessed += 1;
-            if(numProcessed % 10000 == 0) { 
+            if(numProcessed % 1000 == 0) { 
                 LOG.info("Processed {} documents.", numProcessed);
             }
         }
+        contexts.close();
     }
     
     private static Map<ContextType, double[]> createContextVectors(GloveStore glove, List<Token> tokens, int windowSize, CountingVocabulary indexer) {
@@ -74,6 +77,7 @@ public class GloveContextRunner {
                 if(i < windowSize) {
                     windowContext[dim] += vec[dim] / windowSize;
                     windowTfidf[dim] += vec[dim] * idfWeight * 1.0 / windowSize;
+//                    System.out.println(idfWeight + ", " + windowContext[dim] + ", " + windowTfidf[dim]);
                 }
                 
             }
@@ -81,8 +85,8 @@ public class GloveContextRunner {
         Map<ContextType, double[]> contextVectors = new HashMap<>();
         contextVectors.put(ContextType.FULL_EMB, fullContext);
         contextVectors.put(ContextType.WINDOW_EMB, windowContext);
-        contextVectors.put(ContextType.FULL_EMB_TFIDF, fullContext);
-        contextVectors.put(ContextType.WINDOW_EMB_TFIDF, windowContext);
+        contextVectors.put(ContextType.FULL_EMB_TFIDF, fullTfidf);
+        contextVectors.put(ContextType.WINDOW_EMB_TFIDF, windowTfidf);
         return contextVectors;
     }
 }

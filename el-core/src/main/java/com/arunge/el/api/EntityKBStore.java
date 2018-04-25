@@ -80,7 +80,7 @@ public interface EntityKBStore {
      */
     CloseableIterator<KBEntity> allEntities();
    
-
+    CloseableIterator<KBEntity> queryByName(String name);
     
     /**
      * Returns an iterator over the set of entities in the store that match the provided query.

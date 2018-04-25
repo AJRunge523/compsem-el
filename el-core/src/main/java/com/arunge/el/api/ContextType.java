@@ -17,5 +17,7 @@ public enum ContextType {
     FULL_EMB,
     WINDOW_EMB,
     FULL_EMB_TFIDF,
-    WINDOW_EMB_TFIDF
+    WINDOW_EMB_TFIDF,
+    ENT_IB_DIST,
+    ENT_CN_IB_DIST
 }

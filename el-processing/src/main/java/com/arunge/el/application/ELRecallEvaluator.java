@@ -4,8 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.attribute.EntityAttribute;
+import com.arunge.el.nlp.dist.ContextStore;
 import com.arunge.el.processing.EntityCandidateRetrievalEngine;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.arunge.unmei.iterators.CloseableIterator;
@@ -28,7 +31,8 @@ public class ELRecallEvaluator {
             MongoClient client = new MongoClient("localhost", 27017);
             EntityKBStore kbStore = MongoEntityStore.kbStore(client);
             EntityKBStore queryStore = MongoEntityStore.evalStore(client);
-            EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore);
+            ContextStore contexts = ContextStore.getDefault();
+            EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore, contexts);
 
             int numGoldFound = 0;
             int totalQueries = 0;
@@ -36,6 +40,8 @@ public class ELRecallEvaluator {
             int maxCandidates = Integer.MIN_VALUE;
             int totalCandidates = 0;
             CloseableIterator<KBEntity> trainingQueries = queryStore.allEntities();
+            
+            Set<String> candIds = new HashSet<>();
             
             while(trainingQueries.hasNext()) {
                 KBEntity queryEntity = trainingQueries.next();
@@ -46,6 +52,11 @@ public class ELRecallEvaluator {
                 }
                 List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity)
                         .collect(Collectors.toList());
+                
+                for(KBEntity e : candidates) { 
+                    candIds.add(e.getId());
+                }
+                
                 int numCandidates = candidates.size();
                 if (numCandidates < minCandidates) {
                     minCandidates = numCandidates;
@@ -63,6 +74,9 @@ public class ELRecallEvaluator {
                 }
                 totalQueries += 1;
 
+            }
+            for(String s : candIds) { 
+                System.out.println(s);
             }
             double recall = ((double) numGoldFound) / totalQueries;
             writer.write("Number of gold entities found: " + numGoldFound + ", total: " + totalQueries + "\n");

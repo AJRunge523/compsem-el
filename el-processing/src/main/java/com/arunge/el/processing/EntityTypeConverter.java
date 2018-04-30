@@ -57,6 +57,22 @@ public class EntityTypeConverter {
         personTypes.add("_vice president");
         personTypes.add("radio presenter");
         personTypes.add("chef");
+        personTypes.add("rugby league biography");
+        personTypes.add("bishopbiog");
+        personTypes.add("cricketer");
+        personTypes.add("state senator");
+        personTypes.add("actor voice");
+        personTypes.add("pro football player");
+        personTypes.add("nfl player");
+        personTypes.add("ice hockey player");
+        personTypes.add("_philosopher");
+        personTypes.add("euroleague player");
+        personTypes.add("chinese-language singer");
+        personTypes.add("old cricketer");
+        personTypes.add("architect");
+        personTypes.add("badminton player");
+        personTypes.add("former grand prix motorcycle rider");
+        personTypes.add("speedway rider");
         
         gpeTypes = new HashSet<>();
         gpeTypes.add("ort in deutschland");
@@ -77,6 +93,16 @@ public class EntityTypeConverter {
         gpeTypes.add("autonomous region of china (prc)");
         gpeTypes.add("uk place");
         gpeTypes.add("city in afghanistan");
+        gpeTypes.add("cityit");
+        gpeTypes.add("australian place");
+        gpeTypes.add("city");
+        gpeTypes.add("korean settlement");
+        gpeTypes.add("belgium municipality");
+        gpeTypes.add("canada electoral district");
+        gpeTypes.add("u.s. congressional district");
+        gpeTypes.add("german location");
+        gpeTypes.add("school district");
+        gpeTypes.add("philippine municipality");
         
         orgTypes = new HashSet<>();
         orgTypes.add("_company");
@@ -107,6 +133,16 @@ public class EntityTypeConverter {
         orgTypes.add("radio station");
         orgTypes.add("central bank");
         orgTypes.add("bus transit");
+        orgTypes.add("software");
+        orgTypes.add("_software");
+        orgTypes.add("defunct company");
+        orgTypes.add("rail line");
+        orgTypes.add("london bus");
+        orgTypes.add("_radio station");
+        orgTypes.add("_newspaper");
+        orgTypes.add("national football team");
+        orgTypes.add("brewery");
+        orgTypes.add("school district");
         
         
         personArtists = new HashSet<>();

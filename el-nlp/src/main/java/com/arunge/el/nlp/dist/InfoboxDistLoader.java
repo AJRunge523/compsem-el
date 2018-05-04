@@ -13,10 +13,10 @@ import com.mongodb.MongoClient;
 public class InfoboxDistLoader {
 
     public static void main(String[] args) throws IOException { 
-        ContextType type = ContextType.ENT_CN_IB_DIST;
-        File vecFile = new File("output/entity-vectors/v2/infobox-train-cn-vectors.txt");
+        ContextType type = ContextType.ENT_IB_DIST;
+        File vecFile = new File("output/entity-vectors/v3/infobox-name-vectors.txt");
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore store = MongoEntityStore.trainStore(client);
+        MongoEntityStore store = MongoEntityStore.kbStore(client);
         try(BufferedReader reader = new BufferedReader(new FileReader(vecFile))) {
             String line = "";
             while((line = reader.readLine()) != null) { 

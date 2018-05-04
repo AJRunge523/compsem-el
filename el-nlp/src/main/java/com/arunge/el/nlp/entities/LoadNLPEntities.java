@@ -21,9 +21,9 @@ public class LoadNLPEntities {
 
     public static void main(String[] args) throws IOException { 
         
-        File entityFile = new File("output/train-entities-v2.txt");
+        File entityFile = new File("output/eval-entities-v2.txt");
         MongoClient client = new MongoClient("localhost", 27017);
-        MongoEntityStore store = MongoEntityStore.trainStore(client);
+        MongoEntityStore store = MongoEntityStore.evalStore(client);
         try(BufferedReader reader = new BufferedReader(new FileReader(entityFile))) { 
             String id = reader.readLine();
             while(id != null) {
@@ -35,6 +35,7 @@ public class LoadNLPEntities {
     private static String loadEntry(BufferedReader reader, MongoEntityStore store, String id) throws IOException {
         TextEntity te = store.fetchKBText(id).get();
         String name = te.getName();
+        boolean isAcronym = name.matches("[A-Z]{2,}");
         String line = "";
         Set<String> corefEntities = new HashSet<>();
         Set<String> aliases = new HashSet<>();
@@ -48,7 +49,7 @@ public class LoadNLPEntities {
             for(int i = 1; i < names.length; i+=2) {
                 String n = names[i];
                 if(n.equals(name)) {
-                    System.out.println("Exact match");
+//                    System.out.println("Exact match");
                     nameLine = names;
                     break;
                 }
@@ -65,6 +66,10 @@ public class LoadNLPEntities {
                 for(int i = 1; i < entry.length; i+=2) {
                     if(entry[i].toLowerCase().contains(nameLower) && entry[i].length() < candLength) {
 //                        currCand = entry[i];
+                        nameLine = entry;
+                        candLength = entry[i].length();
+                    } else if(isAcronym && name.equals(getAcronym(entry[i]))) {
+                        System.out.println("Found acronym match for " + id + " with name " + name + ": " + entry[1]);
                         nameLine = entry;
                         candLength = entry[i].length();
                     }
@@ -96,12 +101,15 @@ public class LoadNLPEntities {
                 type = EntityType.ORG;
                 count = typeCounts.get("ORGANIZATION");
             }
+        } else {
+            System.out.println("Unable to find name for query entity " + id + " with name " +  name);
         }
         // Add all non-alias lines as coref entities
         for(String[] entry : entryLines) {
             if(!entry.equals(nameLine)) { 
                 for(int i = 1; i < entry.length; i+=2) {
-                    if(entry[i].length() < 50) {
+                    //Don't add names that were also aliases as coref entities to be safe
+                    if(entry[i].length() < 50 && !aliases.contains(entry[i])) {
                         corefEntities.add(entry[i]);
                     }
                 }
@@ -113,8 +121,19 @@ public class LoadNLPEntities {
         store.updateNLPDocument(id, MongoNLPFields.WIKI_ALIASES, aliases);
         
         
-        System.out.println("Entity " + id + " with name " + name + " has type " + type);
+//        System.out.println("Entity " + id + " with name " + name + " has type " + type);
         return line;
+    }
+    
+    private static String getAcronym(String name) {
+        String acr = "";
+        String[] parts = name.split(" ");
+        for(String p : parts) {
+            if(p.charAt(0) >= 'A' && p.charAt(0) <= 'Z') {
+                acr += p.charAt(0);
+            }
+        }
+        return acr;
     }
     
 }

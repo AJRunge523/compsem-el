@@ -21,6 +21,7 @@ import com.arunge.el.attribute.extraction.AcronymExtractor;
 import com.arunge.el.attribute.extraction.AttributeExtractor;
 import com.arunge.el.attribute.extraction.CorefEntityExtractor;
 import com.arunge.el.attribute.extraction.DistributionalContextExtractor;
+import com.arunge.el.attribute.extraction.EntityTypeConverter;
 import com.arunge.el.attribute.extraction.GoldLabelExtractor;
 import com.arunge.el.attribute.extraction.NameExtractor;
 import com.arunge.el.attribute.extraction.TopicModelExtractor;

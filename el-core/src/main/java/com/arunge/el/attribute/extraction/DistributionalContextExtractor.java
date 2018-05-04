@@ -22,7 +22,7 @@ public class DistributionalContextExtractor implements AttributeExtractor {
     public Map<EntityAttribute, Attribute> extract(TextEntity text, NLPDocument nlp) {
         Map<EntityAttribute, Attribute> attributes = new HashMap<>();
         if(nlp.getDistribution(type) != null) {
-            attributes.put(EntityAttribute.CONTEXT_VECTOR, new SparseVectorAttribute(nlp.getDistribution(type)));
+            attributes.put(EntityAttribute.TFIDF_WORDS, new SparseVectorAttribute(nlp.getDistribution(type)));
         }
         return attributes;
     }

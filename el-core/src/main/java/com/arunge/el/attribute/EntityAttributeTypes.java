@@ -18,8 +18,16 @@ public class EntityAttributeTypes {
             return SetAttribute.class;
         case CLEANSED_NAME:
             return StringAttribute.class;
-        case CONTEXT_VECTOR:
+        case TFIDF_WORDS:
             return SparseVectorAttribute.class;
+        case FULL_EMB:
+            return DenseVectorAttribute.class;
+        case WINDOW_EMB:
+            return DenseVectorAttribute.class;
+        case FULL_EMB_TFIDF:
+            return DenseVectorAttribute.class;
+        case WINDOW_EMB_TFIDF:
+            return DenseVectorAttribute.class;
         case GOLD_LABEL:
             return StringAttribute.class;
         case GOLD_NER:
@@ -86,8 +94,16 @@ public class EntityAttributeTypes {
             return wrapSet(val);
         case CLEANSED_NAME:
             return wrapString(val);
-        case CONTEXT_VECTOR:
+        case TFIDF_WORDS:
             return wrapVector(val);
+        case FULL_EMB:
+            return wrapArray(val);
+        case WINDOW_EMB:
+            return wrapArray(val);
+        case FULL_EMB_TFIDF:
+            return wrapArray(val);
+        case WINDOW_EMB_TFIDF:
+            return wrapArray(val);
         case GOLD_LABEL:
             return wrapString(val);
         case GOLD_NER:
@@ -165,4 +181,11 @@ public class EntityAttributeTypes {
         }
     }
     
+    private static Optional<Attribute> wrapArray(Object val){ 
+        try {
+            return Optional.of(DenseVectorAttribute.valueOf((double[] ) val));
+        } catch (ClassCastException e) {
+            return Optional.empty();
+        }
+    }
 }

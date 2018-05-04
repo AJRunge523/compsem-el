@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
@@ -36,15 +37,15 @@ public class CorefEntitiesInfoboxDistComputer {
         
         MongoClient client = new MongoClient("localhost", 27017);
         MongoEntityStore kb = MongoEntityStore.kbStore(client);
-        MongoEntityStore queries = MongoEntityStore.trainStore(client);
+        MongoEntityStore queries = MongoEntityStore.evalStore(client);
         List<TokenFilter> filters = new ArrayList<>();
         filters.add(TokenFilters.stopwords());
         filters.add(TokenFilters.punctuation());
         filters.add(TokenFilters.maxLength(50));
         tokenizer = new FilteredTokenizer(Tokenizers.getDefault(), filters);
         CloseableIterator<NLPDocument> queryNLP = queries.allNLPDocuments();
-        StringIndexer infoboxIndexer = loadInfoboxIndexer(new File("output/entity-vectors/v2/infobox-cn-indexes.txt"));
-        try(BufferedWriter ibVectorWriter = new BufferedWriter(new FileWriter(new File("output/entity-vectors/v2/infobox-train-cn-vectors.txt")))) {
+        StringIndexer infoboxIndexer = loadInfoboxIndexer(new File("output/entity-vectors/v3/infobox-name-indexes.txt"));
+        try(BufferedWriter ibVectorWriter = new BufferedWriter(new FileWriter(new File("output/entity-vectors/v3/infobox-eval-name-vectors.txt")))) {
             while(queryNLP.hasNext()) {
                 NLPDocument doc = queryNLP.next();
                 Map<Integer, Double> infoboxVector = new HashMap<>();
@@ -52,12 +53,15 @@ public class CorefEntitiesInfoboxDistComputer {
                 int totalEnts = 0;
                 for(String c : corefEntities) {
                     String cleansed = getCanonicalName(c);
-                    List<KBEntity> entities = Iterators.toStream(kb.queryByName(cleansed)).collect(Collectors.toList());
+                    List<KBEntity> entities = Iterators.toStream(kb.queryByName(c)).collect(Collectors.toList());
 //                    if(entities.size() > 1) {
 //                        System.out.println("Multiple entities for query " + c + ": " + entities.size());
 //                        continue;
 //                    } 
                     for(KBEntity kbEnt : entities) {
+                        if(kbEnt.getType() == EntityType.UNK) {
+                            continue;
+                        }
                         TextEntity text = kb.fetchKBText(kbEnt.getId()).get();
                         Optional<String> infoType = text.getSingleMetadata("info_type");
                         if(infoType.isPresent()) {
@@ -66,7 +70,10 @@ public class CorefEntitiesInfoboxDistComputer {
                                 continue;
                             }
                             totalEnts += 1;
-                            int index = infoboxIndexer.getOrAdd(type);
+                            int index = infoboxIndexer.getIndex(type);
+                            if(index == -1) {
+                                continue;
+                            }
                             if(!infoboxVector.containsKey(index)) { 
                                 infoboxVector.put(index, 1.0);
                             } else {
@@ -89,7 +96,7 @@ public class CorefEntitiesInfoboxDistComputer {
         clean = clean.replaceAll("-", " ");
         clean = clean.replaceAll("\\p{Punct}", "");
         clean = clean.toLowerCase();
-        clean = tokenizer.tokenize(clean).map(t -> t.text()).reduce("", (a, b) -> a + " " + b);
+        clean = tokenizer.tokenize(clean).map(t -> t.text()).reduce("", (a, b) -> a + b);
         return clean.trim();
     }
     

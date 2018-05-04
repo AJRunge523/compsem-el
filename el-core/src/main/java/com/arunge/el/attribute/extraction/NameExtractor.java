@@ -29,9 +29,9 @@ import com.arunge.nlp.tokenization.TokenFilters.TokenFilter;
  */
 public class NameExtractor implements AttributeExtractor {
 
+    private HashMap<String, String> replacements;
+    
     private Tokenizer tokenizer;
-    
-    
     
     public NameExtractor() {
         List<TokenFilter> filters = new ArrayList<>();
@@ -39,6 +39,17 @@ public class NameExtractor implements AttributeExtractor {
         filters.add(TokenFilters.punctuation());
         filters.add(TokenFilters.maxLength(50));
         this.tokenizer = new FilteredTokenizer(Tokenizers.getDefault(), filters);
+        initReplacements();
+    }
+
+    private void initReplacements() {
+        replacements = new HashMap<>();
+        replacements.put("corp", "corporation");
+        replacements.put("inst", "institute");
+        replacements.put("llc", "");
+        replacements.put("ltd", "");
+        replacements.put("pllc", "");
+        replacements.put("gmbh", "");
     }
     
     @Override
@@ -46,24 +57,31 @@ public class NameExtractor implements AttributeExtractor {
         Map<EntityAttribute, Attribute> attributes = new HashMap<>();
         String name = text.getName();
         attributes.put(EntityAttribute.NAME, StringAttribute.valueOf(name));
-        String cleansedName = cleanCanonicalName(text.getName());
-        attributes.put(EntityAttribute.CLEANSED_NAME, StringAttribute.valueOf(cleansedName));
+        String cleansedName = cleanCanonicalName(text.getName(), true);
+        attributes.put(EntityAttribute.CLEANSED_NAME, StringAttribute.valueOf(cleansedName.replaceAll(" ", "")));
         Set<String> aliases = nlp.getAliases();
 //        aliases.add(name);
         attributes.put(EntityAttribute.ALIASES, SetAttribute.valueOf(aliases));
-        Set<String> cleansedAliases = aliases.stream().map(a -> cleanCanonicalName(a)).collect(Collectors.toSet());
+        Set<String> cleansedAliases = aliases.stream().map(a -> cleanCanonicalName(a, false)).collect(Collectors.toSet());
         attributes.put(EntityAttribute.CLEANSED_ALIASES, SetAttribute.valueOf(cleansedAliases));
         attributes.putAll(getNameNgrams(name, cleansedName, new HashSet<>()));
         return attributes;
     }
 
-    private String cleanCanonicalName(String name) {
+    private String cleanCanonicalName(String name, boolean useSpaces) {
         String clean = name.replaceAll("\\(.*\\)", "");
         clean = clean.replaceAll("-", " ");
         clean = clean.replaceAll("\\p{Punct}", "");
         clean = clean.toLowerCase();
-        clean = tokenizer.tokenize(clean).map(t -> t.text()).reduce("", (a, b) -> a + " " + b);
+        clean = tokenizer.tokenize(clean).map(t -> t.text()).map(t -> replaceToken(t)).reduce("", (a, b) -> a + (useSpaces ? " " : "") + b);
         return clean.trim();
+    }
+    
+    private String replaceToken(String token) {
+        if(replacements.containsKey(token)) {
+            return replacements.get(token);
+        }
+        return token;
     }
     
     /**

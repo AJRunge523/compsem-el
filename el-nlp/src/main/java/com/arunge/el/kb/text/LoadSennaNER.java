@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
+import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
 import com.arunge.el.store.mongo.MongoEntityStore;
 import com.arunge.el.store.mongo.MongoNLPFields;
@@ -22,6 +23,7 @@ public class LoadSennaNER {
         for(File f : nerDir.listFiles()) {
             String entityId = f.getName().replaceAll(".txt", "");
             TextEntity e = store.fetchKBText(entityId).get();
+            NLPDocument nlp = store.fetchNLPDocument(entityId).get();
             KBEntity kbe = store.fetchEntity(entityId).get();
             String[] nameWords = e.getName().split(" ");
 //            System.out.println(entityId + ", " + e.getName());
@@ -32,9 +34,6 @@ public class LoadSennaNER {
                 while((line = reader.readLine()) != null) {
                     String[] lineParts = line.trim().split("\\s+");
                     String word  = lineParts[0];
-                    if(word.equals("Lexington")) { 
-                        System.out.println(f.getName());
-                    }
                     if(word.equals(nameWords[matchedWord])) {
                         matchedWord += 1;
                         if(matchedWord == nameWords.length) {
@@ -54,8 +53,11 @@ public class LoadSennaNER {
                                 String[] nextParts = next.trim().split("\\s+");
                                 if(nextParts[0].equals(",")) {
                                     nextParts = reader.readLine().trim().split("\\s+");
+                                    //Try to fix disconnected city, state references that might help with coreference
                                     if(nextParts[0].matches("[A-Z]{2}")) {
-                                        System.out.println(word + ", " + nextParts[0]);
+                                        System.out.println(entityId + ": " + e.getName() + ", " + nextParts[0]);
+                                        nlp.addAlias(e.getName() + ", " + nextParts[0]);
+                                        store.updateNLPDocument(entityId, MongoNLPFields.WIKI_ALIASES, nlp.getAliases());
                                     }
                                 }
                             }

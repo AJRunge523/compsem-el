@@ -47,7 +47,7 @@ public class MongoEntityFields {
         attrLookup.put(NAME_UNIGRAMS, EntityAttribute.UNIGRAMS);
         attrLookup.put(NAME_BIGRAMS, EntityAttribute.BIGRAMS);
         attrLookup.put(ACRONYM, EntityAttribute.ACRONYM);
-        attrLookup.put(CONTEXT, EntityAttribute.CONTEXT_VECTOR);
+        attrLookup.put(CONTEXT, EntityAttribute.TFIDF_WORDS);
         attrLookup.put(GOLD_LABEL, EntityAttribute.GOLD_LABEL);
         attrLookup.put(GOLD_NER, EntityAttribute.GOLD_NER);
         attrLookup.put(TOPIC25, EntityAttribute.TOPIC_25);
@@ -74,7 +74,7 @@ public class MongoEntityFields {
         fieldLookup.put(EntityAttribute.UNIGRAMS, NAME_UNIGRAMS);
         fieldLookup.put(EntityAttribute.BIGRAMS, NAME_BIGRAMS);
         fieldLookup.put(EntityAttribute.ACRONYM, ACRONYM);
-        fieldLookup.put(EntityAttribute.CONTEXT_VECTOR, CONTEXT);
+        fieldLookup.put(EntityAttribute.TFIDF_WORDS, CONTEXT);
         fieldLookup.put(EntityAttribute.GOLD_LABEL, GOLD_LABEL);
         fieldLookup.put(EntityAttribute.GOLD_NER, GOLD_NER);
         fieldLookup.put(EntityAttribute.TOPIC_25, TOPIC25);

@@ -162,7 +162,7 @@ public class KBEntity {
     }
     
     public Optional<Map<Integer, Double>> getContext() {
-        SparseVectorAttribute attr = (SparseVectorAttribute) attributes.get(EntityAttribute.CONTEXT_VECTOR);
+        SparseVectorAttribute attr = (SparseVectorAttribute) attributes.get(EntityAttribute.TFIDF_WORDS);
         if(attr == null) {
             return Optional.empty();
         }
@@ -170,7 +170,7 @@ public class KBEntity {
     }
     
     public void setContext(Map<Integer, Double> context) {
-        this.attributes.put(EntityAttribute.CONTEXT_VECTOR, new SparseVectorAttribute(context));
+        this.attributes.put(EntityAttribute.TFIDF_WORDS, new SparseVectorAttribute(context));
     }
     
     public Map<EntityAttribute, Attribute> getAttributes() {

@@ -6,7 +6,7 @@ import com.mongodb.MongoClient;
 
 public class KBEntityConversion {
 
-    private static String store = "eval";
+    private static String store = "kb";
     
     public static void main(String[] args) {
         MongoClient client = new MongoClient("localhost", 27017);

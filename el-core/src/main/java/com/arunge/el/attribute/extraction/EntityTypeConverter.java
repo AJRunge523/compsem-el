@@ -1,4 +1,4 @@
-package com.arunge.el.processing;
+package com.arunge.el.attribute.extraction;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -32,6 +32,7 @@ public class EntityTypeConverter {
         personTypes.add("figure skater");
         personTypes.add("actor");
         personTypes.add("football biography");
+        personTypes.add("president");
         personTypes.add("_president");
         personTypes.add("gymnast");
         personTypes.add("_indian_politician");
@@ -73,6 +74,7 @@ public class EntityTypeConverter {
         personTypes.add("badminton player");
         personTypes.add("former grand prix motorcycle rider");
         personTypes.add("speedway rider");
+        personTypes.add("chief justice");
         
         gpeTypes = new HashSet<>();
         gpeTypes.add("ort in deutschland");

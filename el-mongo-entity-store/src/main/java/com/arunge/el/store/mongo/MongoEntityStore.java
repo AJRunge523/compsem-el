@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.arunge.el.api.EntityKBStore;
 import com.arunge.el.api.EntityQuery;
-import com.arunge.el.api.EntityType;
 import com.arunge.el.api.KBEntity;
 import com.arunge.el.api.NLPDocument;
 import com.arunge.el.api.TextEntity;
@@ -199,30 +198,23 @@ public class MongoEntityStore implements EntityKBStore {
     public CloseableIterator<KBEntity> query(EntityQuery query) {
         
         List<Bson> filters = new ArrayList<>();
-//        for(String name : query.getRawNames()) {
-//            filters.add(eq(KB_NAME, name));
-//            filters.add(eq(ALIASES, name));
-//        }
         
         Set<String> names = Sets.newHashSet(query.getRawNames());
         
+        //Find matches for each canonical name/alias
         Set<String> unigrams = new HashSet<>();
         for(int i = 0; i < query.getCleansedNames().size(); i++) {
             String name = query.getCleansedNames().get(i);
             filters.add(eq(CANONICAL_NAME, name));
-            //Only use the unigrams from the main query name, since other aliases are less likely to be reliable.
-            if(i == 0) { 
-                String[] words = name.split("\\s+");
-                List<Bson> wordFilters = new ArrayList<>();
-//                if(words.length > 1) {
-                    for(String word : words) {
-                        wordFilters.add(eq(NAME_UNIGRAMS, word));
-                        unigrams.add(word);
-                    }
-                filters.add(and(wordFilters));
-//                }
-            }
             filters.add(eq(CLEANSED_ALIASES, name));
+        }
+        List<Bson> wordFilters = new ArrayList<>();
+        for(String word : query.getNameUnigrams()) {
+            wordFilters.add(eq(NAME_UNIGRAMS, word));
+            unigrams.add(word);
+        }
+        if(wordFilters.size() > 0) { 
+            filters.add(and(wordFilters));
         }
         
         //If an acronym is one of the primary names, simply search for the acronym as well.

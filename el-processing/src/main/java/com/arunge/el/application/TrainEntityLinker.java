@@ -42,7 +42,7 @@ public class TrainEntityLinker {
         ContextStore contexts = ContextStore.getDefault();
         EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore, contexts);
         
-        ContextType contextType = ContextType.NORM_TFIDF;
+        ContextType[] contextTypes = { ContextType.FULL_EMB, ContextType.FULL_EMB_TFIDF, ContextType.WINDOW_EMB, ContextType.WINDOW_EMB_TFIDF };
         
         EntityPairInstanceConverter instanceConverter = EntityPairInstanceConverter.currentSet();
         
@@ -63,32 +63,44 @@ public class TrainEntityLinker {
         while(trainingQueries.hasNext()) {
             int queryId = numQueries;
             KBEntity queryEntity = trainingQueries.next();
-            if(contextType != ContextType.NORM_TFIDF) {
-                double[] context = contexts.getContext(contextType, queryEntity.getId());
-                queryEntity.setAttribute(EntityAttribute.CONTEXT_VECTOR, DenseVectorAttribute.valueOf(context));
-            }
             if(trainWithDev && !devIds.contains(queryEntity.getId())) { 
                 continue;
+            } else if(!trainWithDev && devIds.contains(queryEntity.getId())) {
+                continue;
             }
+            for(ContextType contextType : contextTypes) {
+                if(contextType != ContextType.NORM_TFIDF) {
+                    double[] context = contexts.getContext(contextType, queryEntity.getId());
+                    queryEntity.setAttribute(EntityAttribute.valueOf(contextType.name()), DenseVectorAttribute.valueOf(context));
+                }
+            }
+            
+
             System.out.println("Query Name: " + queryEntity.getName() + " " + numQueries);
             String goldId = queryEntity.getAttribute(EntityAttribute.GOLD_LABEL).getValueAsStr();
+            String goldNER = queryEntity.getAttribute(EntityAttribute.GOLD_NER).getValueAsStr();
             
-            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity, contextType).collect(Collectors.toList());
+            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity, contextTypes).collect(Collectors.toList());
             if(evalNil) { 
-                candidates.add(new KBEntity("NIL"));
+                KBEntity nil = new KBEntity("NIL");
+                nil.setName("NIL");
+                candidates.add(nil);
             }
             LOG.info("Retrieved {} candidates", candidates.size());
             boolean goldIncluded = false;
+            String goldName = "";
             
             for(KBEntity e : candidates) {
-                if(e.getId().equals(goldId)) {
+                if(e.getId().equals(goldId) ) {
+                    goldName = e.getName();
                     goldIncluded = true;
                     break;
                 }
             }
+            String finalGoldName = goldName;
             //If we're not going to find the gold entity correctly, then we'll skip training on this instance altogether to avoid pathological training points
-            if(!goldIncluded) {
-                continue;
+//            if(!goldIncluded) {
+//                continue;
 //                Optional<KBEntity> gold = kbStore.fetchEntity(goldId);
 //                if(!gold.isPresent()) {
 //                    TextEntity missing = kbStore.fetchKBText(goldId).get();
@@ -97,10 +109,12 @@ public class TrainEntityLinker {
 //                } else {
 //                    candidates.add(gold.get());
 //                }
-            }
+//            }
             
             List<String> instanceStrings = candidates.stream().map(candidate -> {
+                
                 Map<Integer, Double> instance = null;
+                String info = candidate.getId() + "_" + goldId + "_" + goldNER + "_" + candidate.getName() + "_" + finalGoldName;
                 if(candidate.getId().equals("NIL")) {
                     instance = instanceConverter.createNil();
                 } else {
@@ -110,7 +124,7 @@ public class TrainEntityLinker {
                 if(candidate.getId().equals(goldId)) {
                     rank = 2;
                 }
-                String instanceStr = SVMRank.instanceToString(queryId, rank, instance);
+                String instanceStr = SVMRank.instanceToString(queryId, rank, instance, info);
                 return instanceStr;
             }).collect(Collectors.toList());
             
@@ -125,18 +139,16 @@ public class TrainEntityLinker {
         instanceConverter.writeFeatures("output/test/model.features");
         trainWriter.close();
         
-        SVMRank rank = new SVMRank(Paths.get("J:\\Program Files\\SVMRank"));
-        rank.train(trainFile, modelFile, "-c", "20");
-        EntityLinkingEvaluation eval = new EntityLinkingEvaluation(client, contexts, candidateRetrieval, contextType);
-        if(!trainWithDev) { 
-            eval.evalTrain("el-eval-train.txt", devIds, evalNil);
-        } else {
-            eval.evalTrain("el-eval-train.txt", evalNil);
-        }
-        if(!trainWithDev) { 
-            eval.evalDev("el-eval-dev.txt", devIds, evalNil);
-        }
-        eval.evalEval("el-eval-eval.txt", evalNil);
+//        SVMRank rank = new SVMRank(Paths.get("J:\\Program Files\\SVMRank"));
+//        rank.train(trainFile, modelFile, "-c", "20");
+//        EntityLinkingEvaluation eval = new EntityLinkingEvaluation(client, contexts, candidateRetrieval, contextTypes);
+//        if(!trainWithDev) { 
+//            eval.evalTrain("el-eval-train.txt", devIds, evalNil);
+//            eval.evalDev("el-eval-dev.txt", devIds, evalNil);
+//        } else {
+//            eval.evalTrain("el-eval-train.txt", evalNil);
+//        }
+//        eval.evalEval("el-eval-eval.txt", evalNil);
         client.close();
     }
 }

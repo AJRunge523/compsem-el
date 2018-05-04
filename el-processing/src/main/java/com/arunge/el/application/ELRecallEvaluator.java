@@ -27,10 +27,10 @@ public class ELRecallEvaluator {
     private static Logger LOG = LoggerFactory.getLogger(ELRecallEvaluator.class);
     
     public static void main(String[] args) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses-eval.txt")))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("output/recall-misses-train.txt")))) {
             MongoClient client = new MongoClient("localhost", 27017);
             EntityKBStore kbStore = MongoEntityStore.kbStore(client);
-            EntityKBStore queryStore = MongoEntityStore.evalStore(client);
+            EntityKBStore queryStore = MongoEntityStore.trainStore(client);
             ContextStore contexts = ContextStore.getDefault();
             EntityCandidateRetrievalEngine candidateRetrieval = new EntityCandidateRetrievalEngine(kbStore, contexts);
 

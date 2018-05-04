@@ -86,7 +86,7 @@ public class LevenshteinEditDistance extends EntityFeatureExtractor {
         return best;
     }
     
-    private static double computeNormalizedEditDistance(String s1, String s2) {
+    public static double computeNormalizedEditDistance(String s1, String s2) {
         if(s1.length() == 0 && s2.length() == 0) { 
             return 0.0;
         }

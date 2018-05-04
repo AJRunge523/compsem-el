@@ -18,8 +18,8 @@ public class ELPerformanceEvaluator {
     private static Logger LOG = LoggerFactory.getLogger(ELPerformanceEvaluator.class);
     
     public static void main(String[] args) throws IOException {
-        File goldFile = new File("src/main/resources/dev-nonil-gold.txt");
-        File testFile = new File("output/runs/nonil/All Coref NER Combos/el-eval-dev.txt");
+        File goldFile = new File("src/main/resources/dev-gold.txt");
+        File testFile = new File("output/test/dev_eval.txt");
         ELPerformanceEvaluator.evaluate(goldFile, testFile);
     }
     

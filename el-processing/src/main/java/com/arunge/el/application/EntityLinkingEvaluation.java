@@ -43,13 +43,13 @@ public class EntityLinkingEvaluation {
     private MongoClient client;
     private ContextStore contexts;
     private EntityCandidateRetrievalEngine candidateRetrieval;
-    private ContextType contextType;
+    private ContextType[] contextTypes;
     
     public EntityLinkingEvaluation(MongoClient client, ContextStore contexts, 
-            EntityCandidateRetrievalEngine candidateRetrieval, ContextType context) { 
+            EntityCandidateRetrievalEngine candidateRetrieval, ContextType... contextTypes) { 
         this.client = client;
         this.candidateRetrieval = candidateRetrieval;
-        this.contextType = context;
+        this.contextTypes = contextTypes;
         this.contexts = contexts;
     }
     
@@ -132,9 +132,11 @@ public class EntityLinkingEvaluation {
             } else if(idsToSkip.contains(queryEntity.getId())) {
                 continue;
             }
-            if(contextType != ContextType.NORM_TFIDF) {
-                double[] context = contexts.getContext(contextType, queryEntity.getId());
-                queryEntity.setAttribute(EntityAttribute.CONTEXT_VECTOR, DenseVectorAttribute.valueOf(context));
+            for(ContextType contextType : contextTypes) {
+                if(contextType != ContextType.NORM_TFIDF) {
+                    double[] context = contexts.getContext(contextType, queryEntity.getId());
+                    queryEntity.setAttribute(EntityAttribute.valueOf(contextType.name()), DenseVectorAttribute.valueOf(context));
+                }
             }
             numQueries += 1;
             BufferedWriter trainWriter = new BufferedWriter(new FileWriter(evalFile.toFile()));
@@ -150,17 +152,18 @@ public class EntityLinkingEvaluation {
             }
             
             //Retrieve the candidates
-            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity, contextType).collect(Collectors.toList());
+            List<KBEntity> candidates = candidateRetrieval.retrieveCandidates(queryEntity, contextTypes).collect(Collectors.toList());
             candidates.add(new KBEntity("NIL"));
             //Write the candidate instances to a file for processing by the ranker
             List<String> instanceStrings = candidates.stream().map(candidate -> {
+                String info = candidate.getId();
                 Map<Integer, Double> instance = null;
                 if(candidate.getId().equals("NIL")) {
                     instance = instanceConverter.createNil();
                 } else {
                     instance = instanceConverter.convert(queryEntity, candidate);
                 }
-                String instanceStr = SVMRank.instanceToString(queryId, 1, instance);
+                String instanceStr = SVMRank.instanceToString(queryId, 1, instance, info);
                 return instanceStr;
             }).collect(Collectors.toList());
             for(String inst : instanceStrings) {
